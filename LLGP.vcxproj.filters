@@ -31,12 +31,18 @@
     <Filter Include="Header Files\SFML\Window">
       <UniqueIdentifier>{7aa29c32-a574-4cfa-be77-6becdc04b912}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Sprites">
+      <UniqueIdentifier>{0c1636a4-8956-46ca-aedf-8e290d0b467e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UUID.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -347,6 +353,9 @@
     <ClInclude Include="player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="UUID.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages\SFML\include\SFML\Audio\SoundFileFactory.inl">
@@ -388,5 +397,10 @@
     <None Include="packages\SFML\include\SFML\System\Vector3.inl">
       <Filter>Header Files\SFML\System</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\Users\Micha\Downloads\joustsprites.jpg">
+      <Filter>Resource Files\Sprites</Filter>
+    </Image>
   </ItemGroup>
 </Project>

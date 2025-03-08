@@ -1,9 +1,24 @@
 #include "player.h"
 
 // Constructor
-player::player(float x, float y)
+player::player(float x, float y) : ostrichSprite(texture)
 {
-	this->shape.setPosition(sf::Vector2f(x, y));
+	// Set players position
+	ostrichSprite.setPosition(sf::Vector2f(x, y));
+
+	// Set player texture
+	if (!this->texture.loadFromFile("Resources/Sprites/joustsprites.jpg"))
+	{
+		throw std::runtime_error("Failed to load texture: joustsprites.jpg");
+	}
+
+	else
+	{
+		// Set players texture
+		ostrichSprite.setTexture(texture);
+		ostrichSprite.setTextureRect(sf::IntRect({ 384, 62 }, { 40 , 50 }));
+	}
+
 	this->initVariables();
 	this->initShape();
 }
@@ -17,7 +32,7 @@ player::~player()
 // Init functions
 void player::initVariables()
 {
-	this->movementSpeed = 5.f;
+	this->movementSpeed = 150.f;
 }
 
 void player::initShape()
@@ -29,7 +44,7 @@ void player::initShape()
 // Collision Checks
 bool player::checkLeftColl()
 {
-	if (this->shape.getGlobalBounds().position.x <= 0.f)
+	if (ostrichSprite.getGlobalBounds().position.x <= 0.f)
 	{
 		return true;
 	}
@@ -41,7 +56,7 @@ bool player::checkLeftColl()
 
 bool player::checkRightColl(sf::VideoMode screen_bounds)
 {
-	if (this->shape.getGlobalBounds().position.x + this->shape.getGlobalBounds().size.x >= screen_bounds.size.x)
+	if (this->shape.getGlobalBounds().position.x + ostrichSprite.getGlobalBounds().size.x >= screen_bounds.size.x)
 	{
 		return true;
 	}
@@ -53,7 +68,7 @@ bool player::checkRightColl(sf::VideoMode screen_bounds)
 
 bool player::checkTopColl()
 {
-	if (this->shape.getGlobalBounds().position.y <= 0.f)
+	if (ostrichSprite.getGlobalBounds().position.y <= 0.f)
 	{
 		return true;
 	}
@@ -66,7 +81,7 @@ bool player::checkTopColl()
 
 bool player::checkBottomColl(sf::VideoMode screen_bounds)
 {
-	if (this->shape.getGlobalBounds().position.y + this->shape.getGlobalBounds().size.y >= screen_bounds.size.y)
+	if (ostrichSprite.getGlobalBounds().position.y + ostrichSprite.getGlobalBounds().size.y >= screen_bounds.size.y)
 	{
 		return true;
 	}
@@ -79,70 +94,70 @@ bool player::checkBottomColl(sf::VideoMode screen_bounds)
 
 
 // Update functions
-void player::updateInput()
+void player::updateInput(float deltaTime)
 {
 	//Keyboard input
 
 	// Horizontal movement
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::A))
 	{
-		// Move Left
-		shape.move(sf::Vector2f(-movementSpeed, 0.f));
+		// Move left
+		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(-movementSpeed * (deltaTime / 1000), 0.f));
 	}
 
 	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::D))
 	{
-		// Move Right
-		shape.move(sf::Vector2f(movementSpeed, 0.f));
+		// Move right
+		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(movementSpeed * (deltaTime / 1000), 0.f));
 	}
 
 
 	// Vertical movement
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::W))
 	{
-		// Move Up
-		shape.move(sf::Vector2f(0.f, -movementSpeed));
+		// Move up
+		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(0.f, -movementSpeed * (deltaTime / 1000)));
 	}
 	
 	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::S))
 	{
-		// Move Down
-		shape.move(sf::Vector2f(0.f, movementSpeed));
+		// Move down
+		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(0.f, movementSpeed * (deltaTime / 1000)));
 	}
 }
 
 void player::updateWindowsBoundCollision(sf::VideoMode screen_bounds)
 {
-	//Left
+	// Left
 	if (this->checkLeftColl())
 	{
-		this->shape.setPosition(sf::Vector2f(0.f, this->shape.getGlobalBounds().position.y));
+		ostrichSprite.setPosition(sf::Vector2f(0.f, ostrichSprite.getGlobalBounds().position.y));
 	}
 
-	//Right
+	// Right
 	else if (this->checkRightColl(screen_bounds))
 	{
-		this->shape.setPosition(sf::Vector2f(screen_bounds.size.x - this->shape.getGlobalBounds().size.x, this->shape.getGlobalBounds().position.y));
+		ostrichSprite.setPosition(sf::Vector2f(screen_bounds.size.x - ostrichSprite.getGlobalBounds().size.x, ostrichSprite.getGlobalBounds().position.y));
 	}
 
-	//Top
+	// Top
 	if (this->checkTopColl())
 	{
-		this->shape.setPosition(sf::Vector2f(this->shape.getGlobalBounds().position.x, 0.f));
+		ostrichSprite.setPosition(sf::Vector2f(ostrichSprite.getGlobalBounds().position.x, 0.f));
 	}
 
-	//Bottom
+	// Bottom
 
 	else if (this->checkBottomColl(screen_bounds))
 	{
-		this->shape.setPosition(sf::Vector2f(this->shape.getGlobalBounds().position.x, screen_bounds.size.y - this->shape.getGlobalBounds().size.y));
+		ostrichSprite.setPosition(sf::Vector2f(ostrichSprite.getGlobalBounds().position.x, screen_bounds.size.y - ostrichSprite.getGlobalBounds().size.y));
 	}
 }
 
-void player::update(sf::VideoMode screen_bounds)
+void player::update(sf::VideoMode screen_bounds, float deltaTime)
 {
 	// Update keyboard/movement input
-	this->updateInput();
+	this->updateInput(deltaTime);
 
 	// Update window bounds collision
 	this->updateWindowsBoundCollision(screen_bounds);
@@ -152,6 +167,6 @@ void player::update(sf::VideoMode screen_bounds)
 // Render functions
 void player::render(sf::RenderTarget& target)
 {
-	target.draw(this->shape);
+	target.draw(this->ostrichSprite);
 }
 
