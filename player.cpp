@@ -20,7 +20,6 @@ player::player(float x, float y) : ostrichSprite(texture)
 	}
 
 	this->initVariables();
-	this->initShape();
 }
 
 // Destructor
@@ -32,13 +31,7 @@ player::~player()
 // Init functions
 void player::initVariables()
 {
-	this->movementSpeed = 150.f;
-}
-
-void player::initShape()
-{
-	this->shape.setFillColor(sf::Color::Green);
-	this->shape.setSize(sf::Vector2f(50.f, 50.f));
+	this->movementSpeed = MOVEMENTSPEED;
 }
 
 // Collision Checks
@@ -56,7 +49,7 @@ bool player::checkLeftColl()
 
 bool player::checkRightColl(sf::VideoMode screen_bounds)
 {
-	if (this->shape.getGlobalBounds().position.x + ostrichSprite.getGlobalBounds().size.x >= screen_bounds.size.x)
+	if (ostrichSprite.getGlobalBounds().position.x + ostrichSprite.getGlobalBounds().size.x >= screen_bounds.size.x)
 	{
 		return true;
 	}
@@ -92,6 +85,20 @@ bool player::checkBottomColl(sf::VideoMode screen_bounds)
 	}
 }
 
+void player::AddGravity()
+{
+	if (ostrichSprite.getGlobalBounds().position.y + ostrichSprite.getGlobalBounds().size.y <= SCREEN_HEIGHT)
+	{
+		// Set position with gravity added
+	}
+
+	else
+	{
+
+	}
+}
+}
+
 
 // Update functions
 void player::updateInput(float deltaTime)
@@ -102,13 +109,13 @@ void player::updateInput(float deltaTime)
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::A))
 	{
 		// Move left
-		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(-movementSpeed * (deltaTime / 1000), 0.f));
+		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(-movementSpeed, 0.f));
 	}
 
 	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::D))
 	{
 		// Move right
-		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(movementSpeed * (deltaTime / 1000), 0.f));
+		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(movementSpeed, 0.f));
 	}
 
 
@@ -116,13 +123,13 @@ void player::updateInput(float deltaTime)
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::W))
 	{
 		// Move up
-		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(0.f, -movementSpeed * (deltaTime / 1000)));
+		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(0.f, -movementSpeed));
 	}
 	
 	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::S))
 	{
 		// Move down
-		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(0.f, movementSpeed * (deltaTime / 1000)));
+		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(0.f, movementSpeed));
 	}
 }
 
@@ -161,6 +168,8 @@ void player::update(sf::VideoMode screen_bounds, float deltaTime)
 
 	// Update window bounds collision
 	this->updateWindowsBoundCollision(screen_bounds);
+
+	this->AddGravity();
 }
 
 

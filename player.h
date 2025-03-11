@@ -1,13 +1,14 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include "Commons.h"
+#include "Constants.h"
 
 class player
 {
 private:
 
 	// Shapes
-	sf::RectangleShape shape;
 	sf::Texture texture;
 	sf::IntRect ostrich1Rect;  // x, y, width, height
 	sf::Sprite ostrichSprite;
@@ -25,10 +26,12 @@ private:
 	bool checkTopColl();
 	bool checkBottomColl(sf::VideoMode screen_bounds);
 
+	void AddGravity();
+
 public:
 
 	// Constructors and Destructors
-	player(float x = 0.f, float y = 0.f);
+	player(float x = 10.f, float y = 10.f);
 	virtual ~player();
 
 	// Update functions

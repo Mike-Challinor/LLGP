@@ -141,6 +141,8 @@
     <ClCompile Include="UUID.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Commons.h" />
+    <ClInclude Include="Constants.h" />
     <ClInclude Include="packages\SFML\include\SFML\Audio.hpp" />
     <ClInclude Include="packages\SFML\include\SFML\Audio\AudioResource.hpp" />
     <ClInclude Include="packages\SFML\include\SFML\Audio\Export.hpp" />
