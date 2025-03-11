@@ -11,16 +11,20 @@ int WinMain()
 {
     sf::VideoMode videoMode = sf::VideoMode({ 800, 600 });
     sf::RenderWindow window(videoMode, "SFML works!");
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
-    float movementSpeed = 5.f;
+
+    float timeStep = 10;
+    float moveSpeed = 50; // 50 pixels per second
+    sf::Time lastTime = sf::Time();
+    sf::Time currentTime = sf::Time();
+    sf::Clock timer = sf::Clock();
+    timer.start();
+
+    currentTime = timer.getElapsedTime();
 
     unique_ptr<player> playerClass = make_unique<player>(10.f, 10.f);
 
     while (window.isOpen())
     {
-        playerClass->update(videoMode);
-
         // Event polling section of code - this must be done in the thread which created the window
         // we will talk about threading later, but essentially this must be done here
         while (const std::optional event = window.pollEvent())
@@ -28,17 +32,24 @@ int WinMain()
             if (event->is<sf::Event::Closed>())
                 window.close();
 
-            if (event->is<sf::Event::KeyPressed>())
-            {
-                playerClass->updateInput();
-            }
+        }
+
+        // Fixed update loop: Time Step stuff
+        currentTime = timer.getElapsedTime();
+
+        float deltaTime = currentTime.asMilliseconds() - lastTime.asMilliseconds();
+        {
+            lastTime = currentTime;
+
+            // Update the player
+            playerClass->update(videoMode, deltaTime);
         }
 
         // Clear the screen
         window.clear();
-
-        // Draw the object
-        window.draw(shape);
+        
+        // Render the player
+        playerClass->render(window);
 
         // Update the window
         window.display();

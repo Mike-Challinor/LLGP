@@ -8,6 +8,9 @@ private:
 
 	// Shapes
 	sf::RectangleShape shape;
+	sf::Texture texture;
+	sf::IntRect ostrich1Rect;  // x, y, width, height
+	sf::Sprite ostrichSprite;
 
 	// Floats
 	float movementSpeed;
@@ -29,9 +32,9 @@ public:
 	virtual ~player();
 
 	// Update functions
-	void updateInput();
+	void updateInput(float deltaTime);
 	void updateWindowsBoundCollision(sf::VideoMode screen_bounds);
-	void update(sf::VideoMode screen_bounds);
+	void update(sf::VideoMode screen_bounds, float deltaTime);
 
 	// Render functions
 	void render(sf::RenderTarget& target);

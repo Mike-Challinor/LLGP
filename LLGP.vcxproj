@@ -138,6 +138,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="player.cpp" />
+    <ClCompile Include="UUID.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="packages\SFML\include\SFML\Audio.hpp" />
@@ -242,6 +243,7 @@
     <ClInclude Include="packages\SFML\include\SFML\Window\WindowEnums.hpp" />
     <ClInclude Include="packages\SFML\include\SFML\Window\WindowHandle.hpp" />
     <ClInclude Include="player.h" />
+    <ClInclude Include="UUID.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages\SFML\include\SFML\Audio\SoundFileFactory.inl" />
@@ -257,6 +259,9 @@
     <None Include="packages\SFML\include\SFML\System\Vector3.inl" />
     <None Include="packages\SFML\include\SFML\Window\Event.inl" />
     <None Include="packages\SFML\include\SFML\Window\WindowBase.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\Users\Micha\Downloads\joustsprites.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
