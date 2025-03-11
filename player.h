@@ -18,7 +18,6 @@ private:
 
 	// Init functions
 	void initVariables();
-	void initShape();
 
 	// Collision checks
 	bool checkLeftColl();
@@ -35,7 +34,7 @@ public:
 	virtual ~player();
 
 	// Update functions
-	void updateInput(float deltaTime);
+	void updateInput();
 	void updateWindowsBoundCollision(sf::VideoMode screen_bounds);
 	void update(sf::VideoMode screen_bounds, float deltaTime);
 

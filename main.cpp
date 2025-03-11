@@ -17,17 +17,20 @@ int WinMain()
     float deltaTime = 0;
     float timeSinceLastPhysicsLoop = 0;
     float physicsTimeStep = 2000;
+    float inputTimeStep = 2000;
+    float timeSinceLastInputLoop = 0;
 
     unique_ptr<player> playerClass = make_unique<player>(10.f, 10.f);
 
     while (window.isOpen())
     {
-        // Fixed update loop: Time Step stuff
+        // Update time related floats
         deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - lastTime).count();
         lastTime = std::chrono::steady_clock::now();
         timeSinceLastPhysicsLoop += deltaTime;
+        timeSinceLastInputLoop += deltaTime;
 
-        // Physics loop
+        // Physics loop (fixed update)
         while (timeSinceLastPhysicsLoop > physicsTimeStep)
         {
             // Update the player
@@ -35,8 +38,15 @@ int WinMain()
             timeSinceLastPhysicsLoop -= physicsTimeStep;
         }
 
-        // Event polling section of code - this must be done in the thread which created the window
-        // we will talk about threading later, but essentially this must be done here
+        // Input loop (fixed update)
+        while (timeSinceLastInputLoop > inputTimeStep)
+        {
+            // Update players input
+            playerClass->updateInput();
+            timeSinceLastInputLoop -= inputTimeStep;
+        }
+
+        // Event polling section of code
         while (const std::optional event = window.pollEvent())
         {
             if (event->is<sf::Event::Closed>())

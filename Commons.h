@@ -2,7 +2,7 @@
 using namespace std;
 
 const float MOVEMENTSPEED = 1;
-const float GRAVITY = 260.0f;
+const float GRAVITY = 1;
 
 enum FACING
 {

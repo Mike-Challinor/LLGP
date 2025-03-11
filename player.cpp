@@ -87,9 +87,12 @@ bool player::checkBottomColl(sf::VideoMode screen_bounds)
 
 void player::AddGravity()
 {
-	if (ostrichSprite.getGlobalBounds().position.y + ostrichSprite.getGlobalBounds().size.y <= SCREEN_HEIGHT)
+	sf::Vector2f playerPos = ostrichSprite.getPosition();
+
+	if (playerPos.y + ostrichSprite.getGlobalBounds().size.y <= SCREEN_HEIGHT)
 	{
 		// Set position with gravity added
+		ostrichSprite.setPosition(sf::Vector2f(playerPos.x, playerPos.y += GRAVITY));
 	}
 
 	else
@@ -97,13 +100,12 @@ void player::AddGravity()
 
 	}
 }
-}
 
 
 // Update functions
-void player::updateInput(float deltaTime)
+void player::updateInput()
 {
-	//Keyboard input
+	// Keyboard input
 
 	// Horizontal movement
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::A))
@@ -116,20 +118,6 @@ void player::updateInput(float deltaTime)
 	{
 		// Move right
 		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(movementSpeed, 0.f));
-	}
-
-
-	// Vertical movement
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::W))
-	{
-		// Move up
-		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(0.f, -movementSpeed));
-	}
-	
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::S))
-	{
-		// Move down
-		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(0.f, movementSpeed));
 	}
 }
 
@@ -163,15 +151,12 @@ void player::updateWindowsBoundCollision(sf::VideoMode screen_bounds)
 
 void player::update(sf::VideoMode screen_bounds, float deltaTime)
 {
-	// Update keyboard/movement input
-	this->updateInput(deltaTime);
-
 	// Update window bounds collision
 	this->updateWindowsBoundCollision(screen_bounds);
 
+	// Apply gravity to player
 	this->AddGravity();
 }
-
 
 // Render functions
 void player::render(sf::RenderTarget& target)
