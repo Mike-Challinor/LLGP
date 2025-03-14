@@ -14,7 +14,12 @@ private:
 	sf::Sprite ostrichSprite;
 
 	// Floats
-	float movementSpeed;
+	float m_movementSpeed;
+	float m_jumpForce;
+
+	// Bools
+	bool m_isJumping = false;
+	bool m_canJump = true;
 
 	// Init functions
 	void initVariables();
@@ -32,6 +37,9 @@ public:
 	// Constructors and Destructors
 	player(float x = 10.f, float y = 10.f);
 	virtual ~player();
+
+	// Movement functions
+	void Jump();
 
 	// Update functions
 	void updateInput();

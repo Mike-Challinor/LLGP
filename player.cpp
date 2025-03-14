@@ -31,7 +31,7 @@ player::~player()
 // Init functions
 void player::initVariables()
 {
-	this->movementSpeed = MOVEMENTSPEED;
+	this->m_movementSpeed = MOVEMENTSPEED;
 }
 
 // Collision Checks
@@ -89,7 +89,8 @@ void player::AddGravity()
 {
 	sf::Vector2f playerPos = ostrichSprite.getPosition();
 
-	if (playerPos.y + ostrichSprite.getGlobalBounds().size.y <= SCREEN_HEIGHT)
+	// Add gravity
+	if (playerPos.y + ostrichSprite.getGlobalBounds().size.y < SCREEN_HEIGHT)
 	{
 		// Set position with gravity added
 		ostrichSprite.setPosition(sf::Vector2f(playerPos.x, playerPos.y += GRAVITY));
@@ -97,7 +98,17 @@ void player::AddGravity()
 
 	else
 	{
+		m_canJump = true;
+	}
+}
 
+void player::Jump()
+{
+	if (!m_isJumping)
+	{
+		m_isJumping = true;
+		m_jumpForce = INITIAL_JUMP_FORCE;
+		m_canJump = false;
 	}
 }
 
@@ -108,16 +119,26 @@ void player::updateInput()
 	// Keyboard input
 
 	// Horizontal movement
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::A))
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
 	{
 		// Move left
-		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(-movementSpeed, 0.f));
+		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(-m_movementSpeed, 0.f));
 	}
 
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::D))
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
 	{
 		// Move right
-		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(movementSpeed, 0.f));
+		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(m_movementSpeed, 0.f));
+	}
+
+	// Jump movement
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+	{
+		if (m_canJump)
+		{
+			// Jump
+			Jump();
+		}
 	}
 }
 
@@ -153,6 +174,24 @@ void player::update(sf::VideoMode screen_bounds, float deltaTime)
 {
 	// Update window bounds collision
 	this->updateWindowsBoundCollision(screen_bounds);
+
+	if (m_isJumping)
+	{
+		//adjust position
+		float yPos = ostrichSprite.getPosition().y;
+		float newYPos = yPos -= m_jumpForce;
+		ostrichSprite.setPosition(sf::Vector2f(ostrichSprite.getGlobalBounds().position.x, newYPos));
+
+
+		//reduce jump force
+		m_jumpForce -= JUMP_FORCE_DECREMENT;
+
+		// Is jump force 0?
+		if (m_jumpForce <= 0.0f)
+		{
+			m_isJumping = false;
+		}
+	}
 
 	// Apply gravity to player
 	this->AddGravity();
