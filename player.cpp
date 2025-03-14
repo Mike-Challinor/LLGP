@@ -1,8 +1,17 @@
 #include "player.h"
 
 // Constructor
-player::player(float x, float y) : ostrichSprite(texture)
+player::player(LLGP::InputManager& inputManager, float x, float y)
+	: m_inputManager(inputManager), ostrichSprite(texture)
 {
+	// Add listeners for keys
+	inputManager.AddKeyListener(LLGP::Key::W, this, [&]() { keyInputListener(LLGP::Key::W); });
+	inputManager.AddKeyListener(LLGP::Key::A, this, [&]() { keyInputListener(LLGP::Key::A); });
+	inputManager.AddKeyListener(LLGP::Key::D, this, [&]() { keyInputListener(LLGP::Key::D); });
+
+	/*inputManager.OnKeyPress(LLGP::Key::W);
+	inputManager.OnKeyPress(LLGP::Key::A);*/
+
 	// Set players position
 	ostrichSprite.setPosition(sf::Vector2f(x, y));
 
@@ -25,7 +34,10 @@ player::player(float x, float y) : ostrichSprite(texture)
 // Destructor
 player::~player()
 {
-
+	// Remove listeners if necessary
+	m_inputManager.RemoveKeyListener(LLGP::Key::W, this, [&]() { keyInputListener(LLGP::Key::W); });
+	m_inputManager.RemoveKeyListener(LLGP::Key::A, this, [&]() { keyInputListener(LLGP::Key::A); });
+	m_inputManager.RemoveKeyListener(LLGP::Key::D, this, [&]() { keyInputListener(LLGP::Key::D); });
 }
 
 // Init functions
@@ -112,13 +124,46 @@ void player::Jump()
 	}
 }
 
+void player::keyInputListener(LLGP::Key key)
+{
+	switch (key)
+	{
+	case LLGP::Key::W:
+
+		if (m_canJump)
+		{
+			std::cout << "W key pressed! Jumping...\n";
+			Jump();
+		}
+		
+		break;
+
+	case LLGP::Key::A:
+		std::cout << "A key pressed! Moving left...\n";
+
+		// Move left
+		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(-m_movementSpeed, 0.f));
+		break;
+
+	case LLGP::Key::D:
+		std::cout << "A key pressed! Moving left...\n";
+
+		// Move right
+		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(m_movementSpeed, 0.f));
+		break;
+
+	default:
+		std::cout << "Unhandled key pressed.\n";
+		break;
+	}
+}
+
 
 // Update functions
 void player::updateInput()
 {
 	// Keyboard input
-
-	// Horizontal movement
+	/*// Horizontal movement
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
 	{
 		// Move left
@@ -139,7 +184,8 @@ void player::updateInput()
 			// Jump
 			Jump();
 		}
-	}
+	}*/
+	
 }
 
 void player::updateWindowsBoundCollision(sf::VideoMode screen_bounds)

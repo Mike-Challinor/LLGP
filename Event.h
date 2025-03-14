@@ -52,7 +52,6 @@ namespace LLGP
 		void RemoveListener(void* contextObj, const std::function<void(T...)> inFunc)
 		{
 			Binding<T...> listener = Binding<T...>(inFunc, contextObj);
-
 			std::erase_if(listeners, [listener](Binding<T...> b) {return listener.hash_code() == b.hash_code() && listener == b; });
 		}
 		void Empty() { listeners.clear(); }

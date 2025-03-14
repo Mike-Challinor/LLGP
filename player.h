@@ -1,12 +1,17 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <chrono>
 #include "Commons.h"
 #include "Constants.h"
+#include "InputManager.h"
 
 class player
 {
 private:
+	
+	// Managers
+	LLGP::InputManager& m_inputManager; // Reference to an existing InputManager
 
 	// Shapes
 	sf::Texture texture;
@@ -35,11 +40,14 @@ private:
 public:
 
 	// Constructors and Destructors
-	player(float x = 10.f, float y = 10.f);
+	player(LLGP::InputManager& inputManager, float x = 10.f, float y = 10.f);
 	virtual ~player();
 
 	// Movement functions
 	void Jump();
+
+	// Listener functions
+	void keyInputListener(LLGP::Key key);
 
 	// Update functions
 	void updateInput();

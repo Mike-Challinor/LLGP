@@ -1,6 +1,5 @@
 #include <SFML/Graphics.hpp>
 #include "player.h"
-#include "InputManager.h"
 #include <chrono>
 
 using namespace std;
@@ -14,22 +13,10 @@ int WinMain()
     sf::VideoMode videoMode = sf::VideoMode({ 800, 600 });
     sf::RenderWindow window(videoMode, "SFML works!");
 
+    LLGP::InputManager inputManager;
+
     // Player ref
-    unique_ptr<player> playerClass = make_unique<player>(10.f, 10.f);
-
-    // Add listeners for keys
-    inputManager.AddKeyListener(LLGP::Key::W, contextObj, [&]() { playerListener(LLGP::Key::W); });
-    inputManager.AddKeyListener(LLGP::Key::A, contextObj, [&]() { playerListener(LLGP::Key::A); });
-
-    // Simulate key press events
-    inputManager.OnKeyPress(LLGP::Key::W);
-    inputManager.OnKeyPress(LLGP::Key::A);
-
-    // Remove listeners if necessary
-    inputManager.RemoveKeyListener(LLGP::Key::W, contextObj, [&]() { playerListener(LLGP::Key::W); });
-
-    // Simulate another key press after removing the listener
-    inputManager.OnKeyPress(LLGP::Key::W);
+    unique_ptr<player> playerClass = make_unique<player>(inputManager, 10.f, 10.f);
 
     std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
     float deltaTime = 0;
