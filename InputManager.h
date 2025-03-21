@@ -1,6 +1,7 @@
 #pragma once
 #include "Event.h"
 #include "Key.h"
+#include <SFML/Graphics.hpp>
 #include <functional>
 #include <unordered_map>
 
@@ -16,12 +17,11 @@ namespace LLGP
         ~InputManager() = default;
 
         void AddKeyListener(Key key, void* contextObj, const std::function<void()>& inFunc);
-
         void RemoveKeyListener(Key key, void* contextObj, const std::function<void()>& inFunc);
-
         void OnKeyPress(Key key);
-
         void ClearAllListeners();
+
+        void Update();
     };
 }
 

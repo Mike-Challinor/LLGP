@@ -18,6 +18,9 @@ private:
 	sf::IntRect ostrich1Rect;  // x, y, width, height
 	sf::Sprite ostrichSprite;
 
+	//Ints
+	int m_playerID;
+
 	// Floats
 	float m_movementSpeed;
 	float m_jumpForce;
@@ -40,7 +43,7 @@ private:
 public:
 
 	// Constructors and Destructors
-	player(LLGP::InputManager& inputManager, float x = 10.f, float y = 10.f);
+	player(LLGP::InputManager& inputManager, float x = 10.f, float y = 10.f, int player_id = 0);
 	virtual ~player();
 
 	// Movement functions

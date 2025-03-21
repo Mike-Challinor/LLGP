@@ -16,7 +16,8 @@ int WinMain()
     LLGP::InputManager inputManager;
 
     // Player ref
-    unique_ptr<player> playerClass = make_unique<player>(inputManager, 10.f, 10.f);
+    unique_ptr<player> playerClass1 = make_unique<player>(inputManager, 10.f, 10.f, 1);
+    unique_ptr<player> playerClass2 = make_unique<player>(inputManager, 180.f, 10.f, 2);
 
     std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
     float deltaTime = 0;
@@ -39,7 +40,8 @@ int WinMain()
         while (timeSinceLastPhysicsLoop > physicsTimeStep)
         {
             // Update the player
-            playerClass->update(videoMode, deltaTime);
+            playerClass1->update(videoMode, deltaTime);
+            playerClass2->update(videoMode, deltaTime);
             timeSinceLastPhysicsLoop -= physicsTimeStep;
         }
 
@@ -47,7 +49,8 @@ int WinMain()
         while (timeSinceLastInputLoop > inputTimeStep)
         {
             // Update players input
-            playerClass->updateInput();
+            playerClass1->updateInput();
+            playerClass2->updateInput();
             timeSinceLastInputLoop -= inputTimeStep;
         }
 
@@ -63,7 +66,8 @@ int WinMain()
         window.clear();
         
         // Render the player
-        playerClass->render(window);
+        playerClass1->render(window);
+        playerClass2->render(window);
 
         // Update the window
         window.display();

@@ -1,16 +1,26 @@
-#include "player.h"
+     #include "player.h"
 
 // Constructor
-player::player(LLGP::InputManager& inputManager, float x, float y)
+player::player(LLGP::InputManager& inputManager, float x, float y, int player_id)
 	: m_inputManager(inputManager), ostrichSprite(texture)
 {
-	// Add listeners for keys
-	inputManager.AddKeyListener(LLGP::Key::W, this, [&]() { keyInputListener(LLGP::Key::W); });
-	inputManager.AddKeyListener(LLGP::Key::A, this, [&]() { keyInputListener(LLGP::Key::A); });
-	inputManager.AddKeyListener(LLGP::Key::D, this, [&]() { keyInputListener(LLGP::Key::D); });
+	// Set the players id
+	m_playerID = player_id;
 
-	/*inputManager.OnKeyPress(LLGP::Key::W);
-	inputManager.OnKeyPress(LLGP::Key::A);*/
+	// Add listeners for keys
+	if (m_playerID == 1)
+	{
+		inputManager.AddKeyListener(LLGP::Key::W, this, [this]() { keyInputListener(LLGP::Key::W); });
+		inputManager.AddKeyListener(LLGP::Key::A, this, [this]() { keyInputListener(LLGP::Key::A); });
+		inputManager.AddKeyListener(LLGP::Key::D, this, [this]() { keyInputListener(LLGP::Key::D); });
+	}
+
+	else if (m_playerID == 2)
+	{
+		inputManager.AddKeyListener(LLGP::Key::Up, this, [this]() { keyInputListener(LLGP::Key::Up); });
+		inputManager.AddKeyListener(LLGP::Key::Left, this, [this]() { keyInputListener(LLGP::Key::Left); });
+		inputManager.AddKeyListener(LLGP::Key::Right, this, [this]() { keyInputListener(LLGP::Key::Right); });
+	}
 
 	// Set players position
 	ostrichSprite.setPosition(sf::Vector2f(x, y));
@@ -35,9 +45,9 @@ player::player(LLGP::InputManager& inputManager, float x, float y)
 player::~player()
 {
 	// Remove listeners if necessary
-	m_inputManager.RemoveKeyListener(LLGP::Key::W, this, [&]() { keyInputListener(LLGP::Key::W); });
-	m_inputManager.RemoveKeyListener(LLGP::Key::A, this, [&]() { keyInputListener(LLGP::Key::A); });
-	m_inputManager.RemoveKeyListener(LLGP::Key::D, this, [&]() { keyInputListener(LLGP::Key::D); });
+	m_inputManager.RemoveKeyListener(LLGP::Key::W, this, [this]() { keyInputListener(LLGP::Key::W); });
+	m_inputManager.RemoveKeyListener(LLGP::Key::A, this, [this]() { keyInputListener(LLGP::Key::A); });
+	m_inputManager.RemoveKeyListener(LLGP::Key::D, this, [this]() { keyInputListener(LLGP::Key::D); });
 }
 
 // Init functions
@@ -138,15 +148,43 @@ void player::keyInputListener(LLGP::Key key)
 		
 		break;
 
+	case LLGP::Key::Up:
+
+		if (m_canJump)
+		{
+			std::cout << "Up key pressed! Jumping...\n";
+			Jump();
+		}
+		break;
+
 	case LLGP::Key::A:
+
 		std::cout << "A key pressed! Moving left...\n";
 
 		// Move left
 		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(-m_movementSpeed, 0.f));
 		break;
 
+	case LLGP::Key::Left:
+
+		std::cout << "Left key pressed! Moving left...\n";
+
+		// Move left
+		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(-m_movementSpeed, 0.f));
+		break;
+
 	case LLGP::Key::D:
-		std::cout << "A key pressed! Moving left...\n";
+
+		std::cout << "D key pressed! Moving right...\n";
+
+		// Move right
+		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(m_movementSpeed, 0.f));
+		break;
+
+
+	case LLGP::Key::Right:
+
+		std::cout << "Right key pressed! Moving right...\n";
 
 		// Move right
 		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(m_movementSpeed, 0.f));
@@ -163,28 +201,7 @@ void player::keyInputListener(LLGP::Key key)
 void player::updateInput()
 {
 	// Keyboard input
-	/*// Horizontal movement
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
-	{
-		// Move left
-		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(-m_movementSpeed, 0.f));
-	}
-
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
-	{
-		// Move right
-		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(m_movementSpeed, 0.f));
-	}
-
-	// Jump movement
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
-	{
-		if (m_canJump)
-		{
-			// Jump
-			Jump();
-		}
-	}*/
+	m_inputManager.Update();
 	
 }
 
