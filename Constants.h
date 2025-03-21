@@ -8,5 +8,5 @@
 #define TILE_WIDTH 32
 #define TILE_HEIGHT 32
 
-const float JUMP_FORCE_DECREMENT = 400.0f;
-const float INITIAL_JUMP_FORCE = 600.0f;
+const float JUMP_FORCE_DECREMENT = 0.01f;
+const float INITIAL_JUMP_FORCE = 1.25f;

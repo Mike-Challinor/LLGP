@@ -1,8 +1,27 @@
-#include "player.h"
+     #include "player.h"
 
 // Constructor
-player::player(float x, float y) : ostrichSprite(texture)
+player::player(LLGP::InputManager& inputManager, float x, float y, int player_id)
+	: m_inputManager(inputManager), ostrichSprite(texture)
 {
+	// Set the players id
+	m_playerID = player_id;
+
+	// Add listeners for keys
+	if (m_playerID == 1)
+	{
+		inputManager.AddKeyListener(LLGP::Key::W, this, [this]() { keyInputListener(LLGP::Key::W); });
+		inputManager.AddKeyListener(LLGP::Key::A, this, [this]() { keyInputListener(LLGP::Key::A); });
+		inputManager.AddKeyListener(LLGP::Key::D, this, [this]() { keyInputListener(LLGP::Key::D); });
+	}
+
+	else if (m_playerID == 2)
+	{
+		inputManager.AddKeyListener(LLGP::Key::Up, this, [this]() { keyInputListener(LLGP::Key::Up); });
+		inputManager.AddKeyListener(LLGP::Key::Left, this, [this]() { keyInputListener(LLGP::Key::Left); });
+		inputManager.AddKeyListener(LLGP::Key::Right, this, [this]() { keyInputListener(LLGP::Key::Right); });
+	}
+
 	// Set players position
 	ostrichSprite.setPosition(sf::Vector2f(x, y));
 
@@ -25,13 +44,16 @@ player::player(float x, float y) : ostrichSprite(texture)
 // Destructor
 player::~player()
 {
-
+	// Remove listeners if necessary
+	m_inputManager.RemoveKeyListener(LLGP::Key::W, this, [this]() { keyInputListener(LLGP::Key::W); });
+	m_inputManager.RemoveKeyListener(LLGP::Key::A, this, [this]() { keyInputListener(LLGP::Key::A); });
+	m_inputManager.RemoveKeyListener(LLGP::Key::D, this, [this]() { keyInputListener(LLGP::Key::D); });
 }
 
 // Init functions
 void player::initVariables()
 {
-	this->movementSpeed = MOVEMENTSPEED;
+	this->m_movementSpeed = MOVEMENTSPEED;
 }
 
 // Collision Checks
@@ -87,50 +109,100 @@ bool player::checkBottomColl(sf::VideoMode screen_bounds)
 
 void player::AddGravity()
 {
-	if (ostrichSprite.getGlobalBounds().position.y + ostrichSprite.getGlobalBounds().size.y <= SCREEN_HEIGHT)
+	sf::Vector2f playerPos = ostrichSprite.getPosition();
+
+	// Add gravity
+	if (playerPos.y + ostrichSprite.getGlobalBounds().size.y < SCREEN_HEIGHT)
 	{
 		// Set position with gravity added
+		ostrichSprite.setPosition(sf::Vector2f(playerPos.x, playerPos.y += GRAVITY));
 	}
 
 	else
 	{
-
+		m_canJump = true;
 	}
 }
+
+void player::Jump()
+{
+	if (!m_isJumping)
+	{
+		m_isJumping = true;
+		m_jumpForce = INITIAL_JUMP_FORCE;
+		m_canJump = false;
+	}
+}
+
+void player::keyInputListener(LLGP::Key key)
+{
+	switch (key)
+	{
+	case LLGP::Key::W:
+
+		if (m_canJump)
+		{
+			std::cout << "W key pressed! Jumping...\n";
+			Jump();
+		}
+		
+		break;
+
+	case LLGP::Key::Up:
+
+		if (m_canJump)
+		{
+			std::cout << "Up key pressed! Jumping...\n";
+			Jump();
+		}
+		break;
+
+	case LLGP::Key::A:
+
+		std::cout << "A key pressed! Moving left...\n";
+
+		// Move left
+		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(-m_movementSpeed, 0.f));
+		break;
+
+	case LLGP::Key::Left:
+
+		std::cout << "Left key pressed! Moving left...\n";
+
+		// Move left
+		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(-m_movementSpeed, 0.f));
+		break;
+
+	case LLGP::Key::D:
+
+		std::cout << "D key pressed! Moving right...\n";
+
+		// Move right
+		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(m_movementSpeed, 0.f));
+		break;
+
+
+	case LLGP::Key::Right:
+
+		std::cout << "Right key pressed! Moving right...\n";
+
+		// Move right
+		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(m_movementSpeed, 0.f));
+		break;
+
+	default:
+		std::cout << "Unhandled key pressed.\n";
+		break;
+	}
 }
 
 
 // Update functions
-void player::updateInput(float deltaTime)
+void player::updateInput()
 {
-	//Keyboard input
-
-	// Horizontal movement
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::A))
-	{
-		// Move left
-		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(-movementSpeed, 0.f));
-	}
-
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::D))
-	{
-		// Move right
-		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(movementSpeed, 0.f));
-	}
-
-
-	// Vertical movement
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::W))
-	{
-		// Move up
-		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(0.f, -movementSpeed));
-	}
+	// Keyboard input
+	m_inputManager.Update();
 	
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::S))
-	{
-		// Move down
-		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(0.f, movementSpeed));
-	}
 }
 
 void player::updateWindowsBoundCollision(sf::VideoMode screen_bounds)
@@ -163,15 +235,30 @@ void player::updateWindowsBoundCollision(sf::VideoMode screen_bounds)
 
 void player::update(sf::VideoMode screen_bounds, float deltaTime)
 {
-	// Update keyboard/movement input
-	this->updateInput(deltaTime);
-
 	// Update window bounds collision
 	this->updateWindowsBoundCollision(screen_bounds);
 
+	if (m_isJumping)
+	{
+		//adjust position
+		float yPos = ostrichSprite.getPosition().y;
+		float newYPos = yPos -= m_jumpForce;
+		ostrichSprite.setPosition(sf::Vector2f(ostrichSprite.getGlobalBounds().position.x, newYPos));
+
+
+		//reduce jump force
+		m_jumpForce -= JUMP_FORCE_DECREMENT;
+
+		// Is jump force 0?
+		if (m_jumpForce <= 0.0f)
+		{
+			m_isJumping = false;
+		}
+	}
+
+	// Apply gravity to player
 	this->AddGravity();
 }
-
 
 // Render functions
 void player::render(sf::RenderTarget& target)
