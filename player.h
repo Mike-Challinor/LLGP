@@ -34,9 +34,9 @@ private:
 
 	// Collision checks
 	bool checkLeftColl();
-	bool checkRightColl(sf::VideoMode screen_bounds);
+	bool checkRightColl();
 	bool checkTopColl();
-	bool checkBottomColl(sf::VideoMode screen_bounds);
+	bool checkBottomColl();
 
 	void AddGravity();
 
@@ -54,8 +54,8 @@ public:
 
 	// Update functions
 	void updateInput();
-	void updateWindowsBoundCollision(sf::VideoMode screen_bounds);
-	void update(sf::VideoMode screen_bounds, float deltaTime);
+	void updateWindowsBoundCollision();
+	void update(float deltaTime);
 
 	// Render functions
 	void render(sf::RenderTarget& target);

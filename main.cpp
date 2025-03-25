@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include "player.h"
 #include <chrono>
+#include "Constants.h"
 
 using namespace std;
 
@@ -10,7 +11,7 @@ using namespace std;
 
 int WinMain()
 {
-    sf::VideoMode videoMode = sf::VideoMode({ 800, 600 });
+    sf::VideoMode videoMode = sf::VideoMode({ SCREEN_WIDTH, SCREEN_HEIGHT });
     sf::RenderWindow window(videoMode, "SFML works!");
 
     LLGP::InputManager inputManager;
@@ -40,8 +41,8 @@ int WinMain()
         while (timeSinceLastPhysicsLoop > physicsTimeStep)
         {
             // Update the player
-            playerClass1->update(videoMode, deltaTime);
-            playerClass2->update(videoMode, deltaTime);
+            playerClass1->update(deltaTime);
+            playerClass2->update(deltaTime);
             timeSinceLastPhysicsLoop -= physicsTimeStep;
         }
 

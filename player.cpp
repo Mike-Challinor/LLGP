@@ -69,9 +69,9 @@ bool player::checkLeftColl()
 	}
 }
 
-bool player::checkRightColl(sf::VideoMode screen_bounds)
+bool player::checkRightColl()
 {
-	if (ostrichSprite.getGlobalBounds().position.x + ostrichSprite.getGlobalBounds().size.x >= screen_bounds.size.x)
+	if (ostrichSprite.getGlobalBounds().position.x + ostrichSprite.getGlobalBounds().size.x >= SCREEN_WIDTH)
 	{
 		return true;
 	}
@@ -94,9 +94,9 @@ bool player::checkTopColl()
 	}
 }
 
-bool player::checkBottomColl(sf::VideoMode screen_bounds)
+bool player::checkBottomColl()
 {
-	if (ostrichSprite.getGlobalBounds().position.y + ostrichSprite.getGlobalBounds().size.y >= screen_bounds.size.y)
+	if (ostrichSprite.getGlobalBounds().position.y + ostrichSprite.getGlobalBounds().size.y >= SCREEN_HEIGHT)
 	{
 		return true;
 	}
@@ -205,7 +205,7 @@ void player::updateInput()
 	
 }
 
-void player::updateWindowsBoundCollision(sf::VideoMode screen_bounds)
+void player::updateWindowsBoundCollision()
 {
 	// Left
 	if (this->checkLeftColl())
@@ -214,9 +214,9 @@ void player::updateWindowsBoundCollision(sf::VideoMode screen_bounds)
 	}
 
 	// Right
-	else if (this->checkRightColl(screen_bounds))
+	else if (this->checkRightColl())
 	{
-		ostrichSprite.setPosition(sf::Vector2f(screen_bounds.size.x - ostrichSprite.getGlobalBounds().size.x, ostrichSprite.getGlobalBounds().position.y));
+		ostrichSprite.setPosition(sf::Vector2f(SCREEN_WIDTH - ostrichSprite.getGlobalBounds().size.x, ostrichSprite.getGlobalBounds().position.y));
 	}
 
 	// Top
@@ -227,16 +227,16 @@ void player::updateWindowsBoundCollision(sf::VideoMode screen_bounds)
 
 	// Bottom
 
-	else if (this->checkBottomColl(screen_bounds))
+	else if (this->checkBottomColl())
 	{
-		ostrichSprite.setPosition(sf::Vector2f(ostrichSprite.getGlobalBounds().position.x, screen_bounds.size.y - ostrichSprite.getGlobalBounds().size.y));
+		ostrichSprite.setPosition(sf::Vector2f(ostrichSprite.getGlobalBounds().position.x, SCREEN_HEIGHT - ostrichSprite.getGlobalBounds().size.y));
 	}
 }
 
-void player::update(sf::VideoMode screen_bounds, float deltaTime)
+void player::update(float deltaTime)
 {
 	// Update window bounds collision
-	this->updateWindowsBoundCollision(screen_bounds);
+	this->updateWindowsBoundCollision();
 
 	if (m_isJumping)
 	{

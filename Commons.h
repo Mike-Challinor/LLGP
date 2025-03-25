@@ -1,7 +1,7 @@
 #pragma once
 using namespace std;
 
-const float MOVEMENTSPEED = 1;
+const float MOVEMENTSPEED = 0.5;
 const float GRAVITY = 0.3;
 
 enum FACING
