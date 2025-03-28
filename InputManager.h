@@ -11,14 +11,15 @@ namespace LLGP
     {
     private:
         std::unordered_map<Key, Event<>> keyPressEvents;
+        std::unordered_map<Key, Event<>> keyReleaseEvents;
 
     public:
-        InputManager() = default;
-        ~InputManager() = default;
-
-        void AddKeyListener(Key key, void* contextObj, const std::function<void()>& inFunc);
-        void RemoveKeyListener(Key key, void* contextObj, const std::function<void()>& inFunc);
+        void AddKeyPressListener(Key key, void* contextObj, const std::function<void()>& inFunc);
+        void RemoveKeyPressListener(Key key, void* contextObj, const std::function<void()>& inFunc);
+        void AddKeyReleasedListener(Key key, void* contextObj, const std::function<void()>& inFunc);
+        void RemoveKeyReleasedListener(Key key, void* contextObj, const std::function<void()>& inFunc);
         void OnKeyPress(Key key);
+        void OnKeyRelease(Key key);
         void ClearAllListeners();
 
         void Update();

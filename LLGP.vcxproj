@@ -136,11 +136,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AnimationComponent.cpp" />
+    <ClCompile Include="AssetRegistry.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="player.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AnimationComponent.h" />
+    <ClInclude Include="AssetRegistry.h" />
     <ClInclude Include="Commons.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="Event.h" />

@@ -1,8 +1,8 @@
      #include "player.h"
 
 // Constructor
-player::player(LLGP::InputManager& inputManager, float x, float y, int player_id)
-	: m_inputManager(inputManager), ostrichSprite(texture)
+player::player(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry, float x, float y, int player_id)
+	: m_inputManager(inputManager), m_assetRegistry(assetRegistry), m_mountSprite(m_texture)
 {
 	// Set the players id
 	m_playerID = player_id;
@@ -10,44 +10,93 @@ player::player(LLGP::InputManager& inputManager, float x, float y, int player_id
 	// Add listeners for keys
 	if (m_playerID == 1)
 	{
-		inputManager.AddKeyListener(LLGP::Key::W, this, [this]() { keyInputListener(LLGP::Key::W); });
-		inputManager.AddKeyListener(LLGP::Key::A, this, [this]() { keyInputListener(LLGP::Key::A); });
-		inputManager.AddKeyListener(LLGP::Key::D, this, [this]() { keyInputListener(LLGP::Key::D); });
+		m_mountName = "ostrich";
+
+		// Key press listeners
+		inputManager.AddKeyPressListener(LLGP::Key::W, this, [this]() { keyInputListener(LLGP::Key::W); });
+		inputManager.AddKeyPressListener(LLGP::Key::A, this, [this]() { keyInputListener(LLGP::Key::A); });
+		inputManager.AddKeyPressListener(LLGP::Key::D, this, [this]() { keyInputListener(LLGP::Key::D); });
+
+		// Key release listeners
+		inputManager.AddKeyReleasedListener(LLGP::Key::W, this, [this]() { OnKeyReleased(LLGP::Key::W); });
+		inputManager.AddKeyReleasedListener(LLGP::Key::A, this, [this]() { OnKeyReleased(LLGP::Key::A); });
+		inputManager.AddKeyReleasedListener(LLGP::Key::D, this, [this]() { OnKeyReleased(LLGP::Key::D); });
+
 	}
 
 	else if (m_playerID == 2)
 	{
-		inputManager.AddKeyListener(LLGP::Key::Up, this, [this]() { keyInputListener(LLGP::Key::Up); });
-		inputManager.AddKeyListener(LLGP::Key::Left, this, [this]() { keyInputListener(LLGP::Key::Left); });
-		inputManager.AddKeyListener(LLGP::Key::Right, this, [this]() { keyInputListener(LLGP::Key::Right); });
+		m_mountName = "stork";
+
+		// Key press listeners
+		inputManager.AddKeyPressListener(LLGP::Key::Up, this, [this]() { keyInputListener(LLGP::Key::Up); });
+		inputManager.AddKeyPressListener(LLGP::Key::Left, this, [this]() { keyInputListener(LLGP::Key::Left); });
+		inputManager.AddKeyPressListener(LLGP::Key::Right, this, [this]() { keyInputListener(LLGP::Key::Right); });
+
+		// Key release listeners
+		inputManager.AddKeyReleasedListener(LLGP::Key::Up, this, [this]() { OnKeyReleased(LLGP::Key::Up); });
+		inputManager.AddKeyReleasedListener(LLGP::Key::Left, this, [this]() { OnKeyReleased(LLGP::Key::Left); });
+		inputManager.AddKeyReleasedListener(LLGP::Key::Right, this, [this]() { OnKeyReleased(LLGP::Key::Right); });
 	}
 
 	// Set players position
-	ostrichSprite.setPosition(sf::Vector2f(x, y));
+	m_mountSprite.setPosition(sf::Vector2f(x, y));
 
-	// Set player texture
-	if (!this->texture.loadFromFile("Resources/Sprites/joustsprites.jpg"))
+	// Get the ostrich/stork spritemap
+	m_texture = assetRegistry.LoadTexture();
+	m_playerSprites = assetRegistry.LoadPlayerSprites(m_playerID);
+
+
+	m_mountSprite.setTexture(m_texture);
+
+	// Create pointer to the animation component
+	m_animationComponent = make_unique<LLGP::AnimationComponent>(m_mountSprite, m_mountName);
+
+	// Check for null pointer
+	if (m_animationComponent)
 	{
-		throw std::runtime_error("Failed to load texture: joustsprites.jpg");
+		// Set the animation state if pointer is not null
+		m_animationComponent->SetAnimationState(LLGP::idle, m_playerSprites, 1);
 	}
-
 	else
 	{
-		// Set players texture
-		ostrichSprite.setTexture(texture);
-		ostrichSprite.setTextureRect(sf::IntRect({ 384, 62 }, { 40 , 50 }));
+		std::cerr << "AnimationComponent is not initialized!" << std::endl;
 	}
 
 	this->initVariables();
+	
 }
 
 // Destructor
 player::~player()
 {
-	// Remove listeners if necessary
-	m_inputManager.RemoveKeyListener(LLGP::Key::W, this, [this]() { keyInputListener(LLGP::Key::W); });
-	m_inputManager.RemoveKeyListener(LLGP::Key::A, this, [this]() { keyInputListener(LLGP::Key::A); });
-	m_inputManager.RemoveKeyListener(LLGP::Key::D, this, [this]() { keyInputListener(LLGP::Key::D); });
+	// Remove key press listeners
+	m_inputManager.RemoveKeyPressListener(LLGP::Key::W, this, [this]() { keyInputListener(LLGP::Key::W); });
+	m_inputManager.RemoveKeyPressListener(LLGP::Key::A, this, [this]() { keyInputListener(LLGP::Key::A); });
+	m_inputManager.RemoveKeyPressListener(LLGP::Key::D, this, [this]() { keyInputListener(LLGP::Key::D); });
+	m_inputManager.RemoveKeyPressListener(LLGP::Key::Up, this, [this]() { keyInputListener(LLGP::Key::Up); });
+	m_inputManager.RemoveKeyPressListener(LLGP::Key::Left, this, [this]() { keyInputListener(LLGP::Key::Left); });
+	m_inputManager.RemoveKeyPressListener(LLGP::Key::Right, this, [this]() { keyInputListener(LLGP::Key::Right); });
+
+	// Remove key released listeners
+	m_inputManager.RemoveKeyReleasedListener(LLGP::Key::W, this, [this]() { OnKeyReleased(LLGP::Key::W); });
+	m_inputManager.RemoveKeyReleasedListener(LLGP::Key::A, this, [this]() { OnKeyReleased(LLGP::Key::A); });
+	m_inputManager.RemoveKeyReleasedListener(LLGP::Key::D, this, [this]() { OnKeyReleased(LLGP::Key::D); });
+	m_inputManager.RemoveKeyReleasedListener(LLGP::Key::Up, this, [this]() { OnKeyReleased(LLGP::Key::Up); });
+	m_inputManager.RemoveKeyReleasedListener(LLGP::Key::Left, this, [this]() { OnKeyReleased(LLGP::Key::Left); });
+	m_inputManager.RemoveKeyReleasedListener(LLGP::Key::Right, this, [this]() { OnKeyReleased(LLGP::Key::Right); });
+}
+
+sf::IntRect player::GetSpriteRectByName(const std::string& name) const
+{
+	auto it = m_playerSprites.find(name);
+	if (it != m_playerSprites.end())
+	{
+		return it->second; // Found the sprite
+	}
+
+	// Handle missing sprite
+	throw std::runtime_error("Sprite not found: " + name);
 }
 
 // Init functions
@@ -59,7 +108,7 @@ void player::initVariables()
 // Collision Checks
 bool player::checkLeftColl()
 {
-	if (ostrichSprite.getGlobalBounds().position.x <= 0.f)
+	if (m_mountSprite.getGlobalBounds().position.x <= 0.f)
 	{
 		return true;
 	}
@@ -69,9 +118,9 @@ bool player::checkLeftColl()
 	}
 }
 
-bool player::checkRightColl(sf::VideoMode screen_bounds)
+bool player::checkRightColl()
 {
-	if (ostrichSprite.getGlobalBounds().position.x + ostrichSprite.getGlobalBounds().size.x >= screen_bounds.size.x)
+	if (m_mountSprite.getGlobalBounds().position.x + m_mountSprite.getGlobalBounds().size.x >= SCREEN_WIDTH)
 	{
 		return true;
 	}
@@ -83,7 +132,7 @@ bool player::checkRightColl(sf::VideoMode screen_bounds)
 
 bool player::checkTopColl()
 {
-	if (ostrichSprite.getGlobalBounds().position.y <= 0.f)
+	if (m_mountSprite.getGlobalBounds().position.y <= 0.f)
 	{
 		return true;
 	}
@@ -94,9 +143,9 @@ bool player::checkTopColl()
 	}
 }
 
-bool player::checkBottomColl(sf::VideoMode screen_bounds)
+bool player::checkBottomColl()
 {
-	if (ostrichSprite.getGlobalBounds().position.y + ostrichSprite.getGlobalBounds().size.y >= screen_bounds.size.y)
+	if (m_mountSprite.getGlobalBounds().position.y + m_mountSprite.getGlobalBounds().size.y >= SCREEN_HEIGHT)
 	{
 		return true;
 	}
@@ -105,23 +154,53 @@ bool player::checkBottomColl(sf::VideoMode screen_bounds)
 	{
 		return false;
 	}
+}
+
+void player::FlipSprite()
+{
+	// Flip sprite left
+	if (isFacingRight)
+	{
+		// Set the origin to the sprite's center (or appropriate pivot point)
+		m_mountSprite.setOrigin(sf::Vector2f(m_mountSprite.getLocalBounds().size.x, 0.f));
+		// Set the scale to flip
+		m_mountSprite.setScale(sf::Vector2f(-1.f, 1.f));
+	}
+
+	// Flip sprite right
+	else
+	{
+		// Set the origin to the sprite's center (or appropriate pivot point)
+		m_mountSprite.setOrigin(sf::Vector2f(0.f, 0.f));
+
+		// Set the scale to flip
+		m_mountSprite.setScale(sf::Vector2f(1.f, 1.f));
+	}
+
+	isFacingRight = !isFacingRight;
 }
 
 void player::AddGravity()
 {
-	sf::Vector2f playerPos = ostrichSprite.getPosition();
+	sf::Vector2f playerPos = m_mountSprite.getPosition();
 
 	// Add gravity
-	if (playerPos.y + ostrichSprite.getGlobalBounds().size.y < SCREEN_HEIGHT)
+	if (playerPos.y + m_mountSprite.getGlobalBounds().size.y < SCREEN_HEIGHT)
 	{
 		// Set position with gravity added
-		ostrichSprite.setPosition(sf::Vector2f(playerPos.x, playerPos.y += GRAVITY));
+		m_mountSprite.setPosition(sf::Vector2f(playerPos.x, playerPos.y += GRAVITY));
 	}
 
 	else
 	{
 		m_canJump = true;
 	}
+}
+
+void player::Move()
+{
+	// Apply movement to the player sprite
+	m_mountSprite.setPosition(m_mountSprite.getPosition() + m_direction);
 }
 
 void player::Jump()
@@ -134,67 +213,113 @@ void player::Jump()
 	}
 }
 
-void player::keyInputListener(LLGP::Key key)
+void player::ReduceJumpForce()
 {
-	switch (key)
+	// Adjust position
+	float yPos = m_mountSprite.getPosition().y;
+	float newYPos = yPos -= m_jumpForce;
+	m_mountSprite.setPosition(sf::Vector2f(m_mountSprite.getGlobalBounds().position.x, newYPos));
+
+
+	// Reduce jump force
+	m_jumpForce -= JUMP_FORCE_DECREMENT;
+
+	// Is jump force 0?
+	if (m_jumpForce <= 0.0f)
 	{
-	case LLGP::Key::W:
-
-		if (m_canJump)
-		{
-			std::cout << "W key pressed! Jumping...\n";
-			Jump();
-		}
-		
-		break;
-
-	case LLGP::Key::Up:
-
-		if (m_canJump)
-		{
-			std::cout << "Up key pressed! Jumping...\n";
-			Jump();
-		}
-		break;
-
-	case LLGP::Key::A:
-
-		std::cout << "A key pressed! Moving left...\n";
-
-		// Move left
-		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(-m_movementSpeed, 0.f));
-		break;
-
-	case LLGP::Key::Left:
-
-		std::cout << "Left key pressed! Moving left...\n";
-
-		// Move left
-		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(-m_movementSpeed, 0.f));
-		break;
-
-	case LLGP::Key::D:
-
-		std::cout << "D key pressed! Moving right...\n";
-
-		// Move right
-		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(m_movementSpeed, 0.f));
-		break;
-
-
-	case LLGP::Key::Right:
-
-		std::cout << "Right key pressed! Moving right...\n";
-
-		// Move right
-		ostrichSprite.setPosition(ostrichSprite.getPosition() + sf::Vector2f(m_movementSpeed, 0.f));
-		break;
-
-	default:
-		std::cout << "Unhandled key pressed.\n";
-		break;
+		m_isJumping = false;
 	}
 }
+
+void player::UpdateMovementDirection()
+{
+	if (m_activeKeys.count(LLGP::Key::A) || m_activeKeys.count(LLGP::Key::Left))
+	{
+		m_animationComponent->SetAnimationState(LLGP::walking, m_playerSprites, 4);
+
+		if (isFacingRight)
+		{
+			FlipSprite();
+		}
+
+		m_direction = sf::Vector2f(-m_movementSpeed, 0.f);
+	}
+
+	else if (m_activeKeys.count(LLGP::Key::D) || m_activeKeys.count(LLGP::Key::Right))
+	{
+		m_animationComponent->SetAnimationState(LLGP::walking, m_playerSprites, 4);
+
+		if (!isFacingRight)
+		{
+			FlipSprite();
+		}
+
+		m_direction = sf::Vector2f(m_movementSpeed, 0.f);
+	}
+
+	else
+	{
+		m_direction = sf::Vector2f(0.f, 0.f);
+		m_animationComponent->SetAnimationState(LLGP::idle, m_playerSprites, 1);
+	}
+}
+
+void player::keyInputListener(LLGP::Key key)
+{
+	m_activeKeys.insert(key);
+
+	if (m_activeKeys.count(LLGP::Key::A) || m_activeKeys.count(LLGP::Key::Left))
+	{
+		m_animationComponent->SetAnimationState(LLGP::walking, m_playerSprites, 4);
+
+		if (isFacingRight)
+		{
+			FlipSprite();
+		}
+
+		m_direction = sf::Vector2f(-m_movementSpeed, 0.f);
+	}
+
+	else if (m_activeKeys.count(LLGP::Key::D) || m_activeKeys.count(LLGP::Key::Right))
+	{
+		m_animationComponent->SetAnimationState(LLGP::walking, m_playerSprites, 4);
+
+		if (!isFacingRight)
+		{
+			FlipSprite();
+		}
+
+		m_direction = sf::Vector2f(m_movementSpeed, 0.f);
+	}
+
+	if (m_activeKeys.count(LLGP::Key::W) || m_activeKeys.count(LLGP::Key::Up))
+	{
+		Jump();
+	}
+}
+
+
+void player::OnKeyReleased(LLGP::Key key)
+{
+	m_activeKeys.erase(key);
+
+	// Check remaining keys to maintain movement
+	if (m_activeKeys.count(LLGP::Key::A) || m_activeKeys.count(LLGP::Key::Left))
+	{
+		m_direction = sf::Vector2f(-m_movementSpeed, 0.f);
+	}
+	else if (m_activeKeys.count(LLGP::Key::D) || m_activeKeys.count(LLGP::Key::Right))
+	{
+		m_direction = sf::Vector2f(m_movementSpeed, 0.f);
+	}
+	else
+	{
+		// Only stop if no keys are held
+		m_direction = sf::Vector2f(0.f, 0.f);
+		m_animationComponent->SetAnimationState(LLGP::idle, m_playerSprites, 1);
+	}
+}
+
 
 
 // Update functions
@@ -202,59 +327,55 @@ void player::updateInput()
 {
 	// Keyboard input
 	m_inputManager.Update();
+
+	UpdateMovementDirection();
 	
 }
 
-void player::updateWindowsBoundCollision(sf::VideoMode screen_bounds)
+void player::updateWindowsBoundCollision()
 {
 	// Left
 	if (this->checkLeftColl())
 	{
-		ostrichSprite.setPosition(sf::Vector2f(0.f, ostrichSprite.getGlobalBounds().position.y));
+		m_mountSprite.setPosition(sf::Vector2f(0.f, m_mountSprite.getGlobalBounds().position.y));
 	}
 
 	// Right
-	else if (this->checkRightColl(screen_bounds))
+	else if (this->checkRightColl())
 	{
-		ostrichSprite.setPosition(sf::Vector2f(screen_bounds.size.x - ostrichSprite.getGlobalBounds().size.x, ostrichSprite.getGlobalBounds().position.y));
+		m_mountSprite.setPosition(sf::Vector2f(SCREEN_WIDTH - m_mountSprite.getGlobalBounds().size.x, m_mountSprite.getGlobalBounds().position.y));
 	}
 
 	// Top
 	if (this->checkTopColl())
 	{
-		ostrichSprite.setPosition(sf::Vector2f(ostrichSprite.getGlobalBounds().position.x, 0.f));
+		m_mountSprite.setPosition(sf::Vector2f(m_mountSprite.getGlobalBounds().position.x, 0.f));
 	}
 
 	// Bottom
 
-	else if (this->checkBottomColl(screen_bounds))
+	else if (this->checkBottomColl())
 	{
-		ostrichSprite.setPosition(sf::Vector2f(ostrichSprite.getGlobalBounds().position.x, screen_bounds.size.y - ostrichSprite.getGlobalBounds().size.y));
+		m_mountSprite.setPosition(sf::Vector2f(m_mountSprite.getGlobalBounds().position.x, SCREEN_HEIGHT - m_mountSprite.getGlobalBounds().size.y));
 	}
 }
 
-void player::update(sf::VideoMode screen_bounds, float deltaTime)
+void player::update(float deltaTime)
 {
-	// Update window bounds collision
-	this->updateWindowsBoundCollision(screen_bounds);
+	// Update animation component
+	m_animationComponent->Update();
 
+	// Update window bounds collision
+	this->updateWindowsBoundCollision();
+
+	// Reduce jump force if jumping
 	if (m_isJumping)
 	{
-		//adjust position
-		float yPos = ostrichSprite.getPosition().y;
-		float newYPos = yPos -= m_jumpForce;
-		ostrichSprite.setPosition(sf::Vector2f(ostrichSprite.getGlobalBounds().position.x, newYPos));
-
-
-		//reduce jump force
-		m_jumpForce -= JUMP_FORCE_DECREMENT;
-
-		// Is jump force 0?
-		if (m_jumpForce <= 0.0f)
-		{
-			m_isJumping = false;
-		}
+		ReduceJumpForce();
 	}
+
+	// Apply movement
+	this->Move();
 
 	// Apply gravity to player
 	this->AddGravity();
@@ -263,6 +384,6 @@ void player::update(sf::VideoMode screen_bounds, float deltaTime)
 // Render functions
 void player::render(sf::RenderTarget& target)
 {
-	target.draw(this->ostrichSprite);
+	target.draw(this->m_mountSprite);
 }
 
