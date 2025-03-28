@@ -235,7 +235,6 @@ void player::UpdateMovementDirection()
 {
 	if (m_activeKeys.count(LLGP::Key::A) || m_activeKeys.count(LLGP::Key::Left))
 	{
-		m_animationComponent->SetAnimationState(LLGP::walking, m_playerSprites, 4);
 
 		if (isFacingRight)
 		{
@@ -247,7 +246,6 @@ void player::UpdateMovementDirection()
 
 	else if (m_activeKeys.count(LLGP::Key::D) || m_activeKeys.count(LLGP::Key::Right))
 	{
-		m_animationComponent->SetAnimationState(LLGP::walking, m_playerSprites, 4);
 
 		if (!isFacingRight)
 		{
@@ -260,7 +258,6 @@ void player::UpdateMovementDirection()
 	else
 	{
 		m_direction = sf::Vector2f(0.f, 0.f);
-		m_animationComponent->SetAnimationState(LLGP::idle, m_playerSprites, 1);
 	}
 }
 
@@ -270,24 +267,16 @@ void player::keyInputListener(LLGP::Key key)
 
 	if (m_activeKeys.count(LLGP::Key::A) || m_activeKeys.count(LLGP::Key::Left))
 	{
+		
 		m_animationComponent->SetAnimationState(LLGP::walking, m_playerSprites, 4);
-
-		if (isFacingRight)
-		{
-			FlipSprite();
-		}
-
+		
 		m_direction = sf::Vector2f(-m_movementSpeed, 0.f);
 	}
 
 	else if (m_activeKeys.count(LLGP::Key::D) || m_activeKeys.count(LLGP::Key::Right))
 	{
-		m_animationComponent->SetAnimationState(LLGP::walking, m_playerSprites, 4);
-
-		if (!isFacingRight)
-		{
-			FlipSprite();
-		}
+		
+		m_animationComponent->SetAnimationState(LLGP::walking, m_playerSprites, 4); 
 
 		m_direction = sf::Vector2f(m_movementSpeed, 0.f);
 	}

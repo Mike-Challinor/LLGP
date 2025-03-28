@@ -19,6 +19,7 @@ void LLGP::AnimationComponent::SetAnimationState(AnimationState state, std::unor
 	m_currentMap = intRectMap;
 	m_numberOfFrames = numberOfFrames;
 	SetCurrentFrame(0);
+
 }
 
 void LLGP::AnimationComponent::SetNextSprite()
