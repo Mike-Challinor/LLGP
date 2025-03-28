@@ -1,7 +1,8 @@
 #include <SFML/Graphics.hpp>
-#include "player.h"
 #include <chrono>
 #include "Constants.h"
+#include "player.h"
+#include "AssetRegistry.h"
 
 using namespace std;
 
@@ -15,10 +16,13 @@ int WinMain()
     sf::RenderWindow window(videoMode, "SFML works!");
 
     LLGP::InputManager inputManager;
+    LLGP::AssetRegistry assetRegistry;
+
+    assetRegistry.LoadSpriteSheet();
 
     // Player ref
-    unique_ptr<player> playerClass1 = make_unique<player>(inputManager, 10.f, 10.f, 1);
-    unique_ptr<player> playerClass2 = make_unique<player>(inputManager, 180.f, 10.f, 2);
+    unique_ptr<player> playerClass1 = make_unique<player>(inputManager, assetRegistry, 10.f, 10.f, 1);
+    unique_ptr<player> playerClass2 = make_unique<player>(inputManager, assetRegistry, 180.f, 10.f, 2);
 
     std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
     float deltaTime = 0;
@@ -26,8 +30,6 @@ int WinMain()
     float physicsTimeStep = 2000;
     float inputTimeStep = 2000;
     float timeSinceLastInputLoop = 0;
-
-    
 
     while (window.isOpen())
     {
