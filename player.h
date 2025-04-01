@@ -84,7 +84,7 @@ public:
 	// Update functions
 	void updateInput();
 	void updateWindowsBoundCollision();
-	void update(float deltaTime);
+	void update();
 
 	// Render functions
 	void render(sf::RenderTarget& target);

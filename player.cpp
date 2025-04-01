@@ -349,7 +349,7 @@ void player::updateWindowsBoundCollision()
 	}
 }
 
-void player::update(float deltaTime)
+void player::update()
 {
 	// Update animation component
 	m_animationComponent->Update();
