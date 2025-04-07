@@ -14,10 +14,23 @@ namespace LLGP
 		flying
 	};
 
+	inline std::string ToString(AnimationState state)
+	{
+		switch (state)
+		{
+		case AnimationState::idle:    return "idle";
+		case AnimationState::walking: return "walking";
+		case AnimationState::skidding: return "skidding";
+		case AnimationState::flying: return "flying";
+		default:                      return "Unknown";
+		}
+	}
+
 	class AnimationComponent
 	{
 	private:
 		int m_currentFrame = 0;
+		int m_startingFrame = 0;
 		int m_numberOfFrames;
 		sf::Sprite& m_sprite;
 		sf::Texture m_texture;
@@ -27,14 +40,14 @@ namespace LLGP
 
 		sf::IntRect GetSpriteRectByName(const std::string& name) const;
 		void SetNextSprite();
-		void SetCurrentFrame(int currentFrame);
+		void SetStartingFrame(int startingFrame);
 	
 	public:
 		AnimationComponent(sf::Sprite& sprite, std::string name);
 		~AnimationComponent();
 
-		void SetAnimationState(AnimationState state, std::unordered_map<std::string, sf::IntRect>& intRectMap, int numberOfFrames);
-		
+		void SetAnimationState(AnimationState state, std::unordered_map<std::string, sf::IntRect>& intRectMap, int numberOfFrames, int startingFrame);
+		AnimationState GetState();
 
 		void Update();
 	};

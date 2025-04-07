@@ -10,6 +10,12 @@
 #include "AssetRegistry.h"
 #include "AnimationComponent.h"
 
+struct Animation
+{
+	int numberOfFrames;
+	int startingFrame;
+};
+
 class player
 {
 private:
@@ -18,9 +24,13 @@ private:
 	LLGP::InputManager& m_inputManager; // Reference to an existing InputManager
 	LLGP::AssetRegistry& m_assetRegistry; // Reference to an existing AssetRegistry
 
+	// Animations
+	std::unordered_map<LLGP::AnimationState, Animation> m_animations;
+
 	// Shapes
 	sf::Texture m_texture;
 	sf::Sprite m_mountSprite;
+
 	std::unordered_map<std::string, sf::IntRect> m_playerSprites;
 
 	// Vectors
@@ -38,6 +48,7 @@ private:
 	bool m_canJump = true;
 	bool isFacingRight = true;
 	bool m_isMoving = true;
+	bool m_isGrounded = false;
 
 	// Strings
 	std::string m_mountName;
@@ -49,7 +60,8 @@ private:
 	std::set<LLGP::Key> m_activeKeys; // Tracks current active keys
 
 	// Init functions
-	void initVariables();
+	void InitVariables();
+	void InitAnimations();
 
 	// Collision check functions
 	bool checkLeftColl();

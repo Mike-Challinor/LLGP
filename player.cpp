@@ -46,6 +46,7 @@ player::player(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegis
 	m_texture = assetRegistry.LoadTexture();
 	m_playerSprites = assetRegistry.LoadPlayerSprites(m_playerID);
 
+	InitAnimations();
 
 	m_mountSprite.setTexture(m_texture);
 
@@ -56,14 +57,16 @@ player::player(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegis
 	if (m_animationComponent)
 	{
 		// Set the animation state if pointer is not null
-		m_animationComponent->SetAnimationState(LLGP::idle, m_playerSprites, 1);
+		m_animationComponent->SetAnimationState(LLGP::idle, m_playerSprites, m_animations[LLGP::AnimationState::idle].numberOfFrames
+			, m_animations[LLGP::AnimationState::idle].startingFrame
+		);
 	}
 	else
 	{
 		std::cerr << "AnimationComponent is not initialized!" << std::endl;
 	}
 
-	this->initVariables();
+	this->InitVariables();
 	
 }
 
@@ -100,9 +103,16 @@ sf::IntRect player::GetSpriteRectByName(const std::string& name) const
 }
 
 // Init functions
-void player::initVariables()
+void player::InitVariables()
 {
 	this->m_movementSpeed = MOVEMENTSPEED;
+}
+
+void player::InitAnimations()
+{
+	m_animations[LLGP::AnimationState::idle] = Animation{ 1, 0 };
+	m_animations[LLGP::AnimationState::walking] = Animation{ 4, 0 };
+	m_animations[LLGP::AnimationState::flying] = Animation{ 2, 6 };
 }
 
 // Collision Checks
@@ -194,6 +204,8 @@ void player::AddGravity()
 	else
 	{
 		m_canJump = true;
+		m_isGrounded = true;
+
 	}
 }
 
@@ -267,8 +279,12 @@ void player::keyInputListener(LLGP::Key key)
 
 	if (m_activeKeys.count(LLGP::Key::A) || m_activeKeys.count(LLGP::Key::Left))
 	{
+		if (m_isGrounded)
+		{
+			m_animationComponent->SetAnimationState(LLGP::walking, m_playerSprites, m_animations[LLGP::AnimationState::walking].numberOfFrames
+				, m_animations[LLGP::AnimationState::walking].startingFrame);
+		}
 		
-		m_animationComponent->SetAnimationState(LLGP::walking, m_playerSprites, 4);
 		
 		m_direction = sf::Vector2f(-m_movementSpeed, 0.f);
 	}
@@ -276,7 +292,11 @@ void player::keyInputListener(LLGP::Key key)
 	else if (m_activeKeys.count(LLGP::Key::D) || m_activeKeys.count(LLGP::Key::Right))
 	{
 		
-		m_animationComponent->SetAnimationState(LLGP::walking, m_playerSprites, 4); 
+		if (m_isGrounded)
+		{
+			m_animationComponent->SetAnimationState(LLGP::walking, m_playerSprites, m_animations[LLGP::AnimationState::walking].numberOfFrames
+				, m_animations[LLGP::AnimationState::walking].startingFrame);
+		}
 
 		m_direction = sf::Vector2f(m_movementSpeed, 0.f);
 	}
@@ -303,9 +323,15 @@ void player::OnKeyReleased(LLGP::Key key)
 	}
 	else
 	{
-		// Only stop if no keys are held
-		m_direction = sf::Vector2f(0.f, 0.f);
-		m_animationComponent->SetAnimationState(LLGP::idle, m_playerSprites, 1);
+		if (!m_isJumping)
+		{
+			// Only stop if no keys are held
+			m_direction = sf::Vector2f(0.f, 0.f);
+
+			m_animationComponent->SetAnimationState(LLGP::idle, m_playerSprites, m_animations[LLGP::AnimationState::idle].numberOfFrames
+				, m_animations[LLGP::AnimationState::idle].startingFrame);
+		}
+		
 	}
 }
 

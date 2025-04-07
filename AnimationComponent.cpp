@@ -13,13 +13,18 @@ LLGP::AnimationComponent::~AnimationComponent()
 {
 }
 
-void LLGP::AnimationComponent::SetAnimationState(AnimationState state, std::unordered_map<std::string, sf::IntRect>& intRectMap, int numberOfFrames)
+void LLGP::AnimationComponent::SetAnimationState(AnimationState state, std::unordered_map<std::string, sf::IntRect>& intRectMap, int numberOfFrames, int startingFrame)
 {
 	m_currentState = state;
 	m_currentMap = intRectMap;
 	m_numberOfFrames = numberOfFrames;
-	SetCurrentFrame(0);
+	SetStartingFrame(startingFrame);
 
+}
+
+LLGP::AnimationState LLGP::AnimationComponent::GetState()
+{
+	return m_currentState;
 }
 
 void LLGP::AnimationComponent::SetNextSprite()
@@ -30,9 +35,10 @@ void LLGP::AnimationComponent::SetNextSprite()
 	m_currentFrame = (m_currentFrame + 1) % m_numberOfFrames;
 }
 
-void LLGP::AnimationComponent::SetCurrentFrame(int currentFrame)
+void LLGP::AnimationComponent::SetStartingFrame(int startingFrame)
 {
-	m_currentFrame = currentFrame;
+	m_startingFrame = startingFrame;
+	m_currentFrame = startingFrame;
 }
 
 void LLGP::AnimationComponent::Update()
