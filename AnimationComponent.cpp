@@ -32,7 +32,9 @@ void LLGP::AnimationComponent::SetNextSprite()
 	m_sprite.setTextureRect(GetSpriteRectByName(m_name + std::to_string(m_currentFrame)));
 
 	// Increment frame (after setting it)
-	m_currentFrame = (m_currentFrame + 1) % m_numberOfFrames;
+	//m_currentFrame = (m_currentFrame + 1) % m_numberOfFrames;
+	int relativeFrame = (m_currentFrame - m_startingFrame + 1) % m_numberOfFrames;
+	m_currentFrame = m_startingFrame + relativeFrame;
 }
 
 void LLGP::AnimationComponent::SetStartingFrame(int startingFrame)

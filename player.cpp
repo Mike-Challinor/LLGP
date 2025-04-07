@@ -112,7 +112,7 @@ void player::InitAnimations()
 {
 	m_animations[LLGP::AnimationState::idle] = Animation{ 1, 0 };
 	m_animations[LLGP::AnimationState::walking] = Animation{ 4, 0 };
-	m_animations[LLGP::AnimationState::flying] = Animation{ 2, 6 };
+	m_animations[LLGP::AnimationState::flying] = Animation{ 2, 5 };
 }
 
 // Collision Checks
@@ -199,12 +199,24 @@ void player::AddGravity()
 	{
 		// Set position with gravity added
 		m_mountSprite.setPosition(sf::Vector2f(playerPos.x, playerPos.y += GRAVITY));
+
+		if (m_animationComponent->GetState() != LLGP::flying)
+		{
+			m_animationComponent->SetAnimationState(LLGP::flying, m_playerSprites, m_animations[LLGP::AnimationState::flying].numberOfFrames
+				, m_animations[LLGP::AnimationState::flying].startingFrame);
+		}
 	}
 
 	else
 	{
 		m_canJump = true;
 		m_isGrounded = true;
+
+		if (!m_isMoving)
+		{
+			m_animationComponent->SetAnimationState(LLGP::idle, m_playerSprites, m_animations[LLGP::AnimationState::idle].numberOfFrames
+				, m_animations[LLGP::AnimationState::idle].startingFrame);
+		}
 
 	}
 }
@@ -323,6 +335,8 @@ void player::OnKeyReleased(LLGP::Key key)
 	}
 	else
 	{
+		m_isMoving = false;
+
 		if (!m_isJumping)
 		{
 			// Only stop if no keys are held
