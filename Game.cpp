@@ -7,9 +7,8 @@ Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
 	assetRegistry.LoadSpriteSheet();
 
 	// Create the players
-	m_players.push_back(std::make_unique<player>(inputManager, assetRegistry, 10.f, 10.f, 1));
-	m_players.push_back(std::make_unique<player>(inputManager, assetRegistry, 180.f, 10.f, 2));
-
+	m_players.push_back(std::make_unique<player>(inputManager, assetRegistry, 10.f, SCREEN_HEIGHT - 40.f, 1));
+	m_players.push_back(std::make_unique<player>(inputManager, assetRegistry, 180.f, SCREEN_HEIGHT - 40.f, 2));	
 }
 
 Game::~Game()
@@ -20,7 +19,7 @@ void Game::Update()
 {
 	for (auto& player : m_players)
 	{
-		player->update();
+		player->Update();
 	}
 }
 
@@ -28,7 +27,7 @@ void Game::UpdateInputs()
 {
 	for (auto& player : m_players)
 	{
-		player->updateInput();
+		player->UpdateInput();
 	}
 }
 
@@ -36,6 +35,6 @@ void Game::Render(sf::RenderTarget& target)
 {
 	for (auto& player : m_players)
 	{
-		player->render(target);
+		player->Render(target);
 	}
 }

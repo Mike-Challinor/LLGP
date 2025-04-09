@@ -11,6 +11,8 @@ namespace LLGP
 	private:
 		sf::Texture m_spriteSheet;
 
+		sf::Font m_joustFont;
+
 		std::unordered_map<std::string, sf::IntRect> m_ostrichTextures;
 		std::unordered_map<std::string, sf::IntRect> m_storkTextures;
 		std::unordered_map<std::string, sf::IntRect> m_vultureTextures;
@@ -25,9 +27,11 @@ namespace LLGP
 			int padding);
 
 		void StoreTextureMaps();
+		void InitFonts();
 
 	public:
 		void LoadSpriteSheet();
+		sf::Font GetFont();
 		const std::unordered_map<std::string, sf::IntRect>& LoadPlayerSprites(int player_id);
 		sf::Texture& LoadTexture();
 	};

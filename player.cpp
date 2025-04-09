@@ -7,6 +7,9 @@ player::player(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegis
 	// Set the players id
 	m_playerID = player_id;
 
+	// Initialize feet position to be at the bottom center of the player
+	UpdateFeetPosition();
+
 	// Add listeners for keys
 	if (m_playerID == 1)
 	{
@@ -105,7 +108,7 @@ sf::IntRect player::GetSpriteRectByName(const std::string& name) const
 // Init functions
 void player::InitVariables()
 {
-	this->m_movementSpeed = MOVEMENTSPEED;
+	m_movementSpeed = MOVEMENTSPEED;
 }
 
 void player::InitAnimations()
@@ -116,7 +119,7 @@ void player::InitAnimations()
 }
 
 // Collision Checks
-bool player::checkLeftColl()
+bool player::CheckLeftColl()
 {
 	if (m_mountSprite.getGlobalBounds().position.x <= 0.f)
 	{
@@ -128,7 +131,7 @@ bool player::checkLeftColl()
 	}
 }
 
-bool player::checkRightColl()
+bool player::CheckRightColl()
 {
 	if (m_mountSprite.getGlobalBounds().position.x + m_mountSprite.getGlobalBounds().size.x >= SCREEN_WIDTH)
 	{
@@ -140,7 +143,7 @@ bool player::checkRightColl()
 	}
 }
 
-bool player::checkTopColl()
+bool player::CheckTopColl()
 {
 	if (m_mountSprite.getGlobalBounds().position.y <= 0.f)
 	{
@@ -153,17 +156,19 @@ bool player::checkTopColl()
 	}
 }
 
-bool player::checkBottomColl()
+bool player::CheckFeetColl()
 {
-	if (m_mountSprite.getGlobalBounds().position.y + m_mountSprite.getGlobalBounds().size.y >= SCREEN_HEIGHT)
+	// Check if feet are colliding with the ground (using feet position)
+	if (m_feetPosition.y >= SCREEN_HEIGHT)
 	{
+		m_isGrounded = true;
+		m_isJumping = false;
+		m_canJump = true;
+
 		return true;
 	}
 
-	else
-	{
-		return false;
-	}
+	return false;
 }
 
 void player::FlipSprite()
@@ -195,7 +200,7 @@ void player::AddGravity()
 	sf::Vector2f playerPos = m_mountSprite.getPosition();
 
 	// Add gravity
-	if (playerPos.y + m_mountSprite.getGlobalBounds().size.y < SCREEN_HEIGHT)
+	if (!CheckFeetColl())
 	{
 		// Set position with gravity added
 		m_mountSprite.setPosition(sf::Vector2f(playerPos.x, playerPos.y += GRAVITY));
@@ -209,13 +214,16 @@ void player::AddGravity()
 
 	else
 	{
-		m_canJump = true;
-		m_isGrounded = true;
-
-		if (!m_isMoving)
+		if (!m_isMoving && !m_isJumping)
 		{
 			m_animationComponent->SetAnimationState(LLGP::idle, m_playerSprites, m_animations[LLGP::AnimationState::idle].numberOfFrames
 				, m_animations[LLGP::AnimationState::idle].startingFrame);
+		}
+
+		else if (m_isMoving && !m_isJumping)
+		{
+			m_animationComponent->SetAnimationState(LLGP::walking, m_playerSprites, m_animations[LLGP::AnimationState::walking].numberOfFrames
+				, m_animations[LLGP::AnimationState::walking].startingFrame);
 		}
 
 	}
@@ -229,30 +237,39 @@ void player::Move()
 
 void player::Jump()
 {
-	if (!m_isJumping)
+	if (!m_isJumping && m_canJump)
 	{
 		m_isJumping = true;
 		m_jumpForce = INITIAL_JUMP_FORCE;
 		m_canJump = false;
+		m_isGrounded = false;
 	}
+
+	ReduceJumpForce();
 }
 
 void player::ReduceJumpForce()
 {
-	// Adjust position
-	float yPos = m_mountSprite.getPosition().y;
-	float newYPos = yPos -= m_jumpForce;
-	m_mountSprite.setPosition(sf::Vector2f(m_mountSprite.getGlobalBounds().position.x, newYPos));
-
-
-	// Reduce jump force
-	m_jumpForce -= JUMP_FORCE_DECREMENT;
-
-	// Is jump force 0?
-	if (m_jumpForce <= 0.0f)
+	if (m_isJumping)
 	{
-		m_isJumping = false;
+		// Adjust position
+		float yPos = m_mountSprite.getPosition().y;
+		float newYPos = yPos -= m_jumpForce;
+		m_mountSprite.setPosition(sf::Vector2f(m_mountSprite.getGlobalBounds().position.x, newYPos));
+
+		// Reduce jump force
+		m_jumpForce -= JUMP_FORCE_DECREMENT;
+
+		UpdateFeetPosition();
+
+		// Stop jump when force has reached 0
+		if (m_jumpForce <= 0.0f)
+		{
+			m_isJumping = false;
+			m_canJump = true;
+		}
 	}
+	
 }
 
 void player::UpdateMovementDirection()
@@ -285,26 +302,36 @@ void player::UpdateMovementDirection()
 	}
 }
 
+void player::UpdateFeetPosition()
+{
+	// Update the feet position (the bottom center of the player)
+	m_feetPosition = sf::Vector2f(m_mountSprite.getPosition().x + m_mountSprite.getGlobalBounds().size.x / 2.f,
+		m_mountSprite.getPosition().y + m_mountSprite.getGlobalBounds().size.y);
+}
+
+
 void player::keyInputListener(LLGP::Key key)
 {
 	m_activeKeys.insert(key);
 
 	if (m_activeKeys.count(LLGP::Key::A) || m_activeKeys.count(LLGP::Key::Left))
 	{
-		if (m_isGrounded)
+		m_isMoving = true;
+
+		if (!m_isJumping)
 		{
 			m_animationComponent->SetAnimationState(LLGP::walking, m_playerSprites, m_animations[LLGP::AnimationState::walking].numberOfFrames
 				, m_animations[LLGP::AnimationState::walking].startingFrame);
 		}
-		
 		
 		m_direction = sf::Vector2f(-m_movementSpeed, 0.f);
 	}
 
 	else if (m_activeKeys.count(LLGP::Key::D) || m_activeKeys.count(LLGP::Key::Right))
 	{
+		m_isMoving = true;
 		
-		if (m_isGrounded)
+		if (!m_isJumping)
 		{
 			m_animationComponent->SetAnimationState(LLGP::walking, m_playerSprites, m_animations[LLGP::AnimationState::walking].numberOfFrames
 				, m_animations[LLGP::AnimationState::walking].startingFrame);
@@ -349,10 +376,8 @@ void player::OnKeyReleased(LLGP::Key key)
 	}
 }
 
-
-
 // Update functions
-void player::updateInput()
+void player::UpdateInput()
 {
 	// Keyboard input
 	m_inputManager.Update();
@@ -361,57 +386,58 @@ void player::updateInput()
 	
 }
 
-void player::updateWindowsBoundCollision()
+void player::UpdateWindowsBoundCollision()
 {
 	// Left
-	if (this->checkLeftColl())
+	if (this->CheckLeftColl())
 	{
 		m_mountSprite.setPosition(sf::Vector2f(0.f, m_mountSprite.getGlobalBounds().position.y));
 	}
 
 	// Right
-	else if (this->checkRightColl())
+	else if (this->CheckRightColl())
 	{
 		m_mountSprite.setPosition(sf::Vector2f(SCREEN_WIDTH - m_mountSprite.getGlobalBounds().size.x, m_mountSprite.getGlobalBounds().position.y));
 	}
 
 	// Top
-	if (this->checkTopColl())
+	if (this->CheckTopColl())
 	{
 		m_mountSprite.setPosition(sf::Vector2f(m_mountSprite.getGlobalBounds().position.x, 0.f));
 	}
 
 	// Bottom
 
-	else if (this->checkBottomColl())
+	else if (this->CheckFeetColl())
 	{
 		m_mountSprite.setPosition(sf::Vector2f(m_mountSprite.getGlobalBounds().position.x, SCREEN_HEIGHT - m_mountSprite.getGlobalBounds().size.y));
 	}
 }
 
-void player::update()
+void player::Update()
 {
 	// Update animation component
 	m_animationComponent->Update();
 
 	// Update window bounds collision
-	this->updateWindowsBoundCollision();
-
-	// Reduce jump force if jumping
-	if (m_isJumping)
-	{
-		ReduceJumpForce();
-	}
-
-	// Apply movement
-	this->Move();
+	UpdateWindowsBoundCollision();
 
 	// Apply gravity to player
-	this->AddGravity();
+	AddGravity();
+
+	// Reduce jump force if jumping
+	ReduceJumpForce();
+
+	// Apply movement
+	Move();
+
+	// Update the players feet position
+	UpdateFeetPosition();
+
 }
 
 // Render functions
-void player::render(sf::RenderTarget& target)
+void player::Render(sf::RenderTarget& target)
 {
 	target.draw(this->m_mountSprite);
 }

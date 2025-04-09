@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "player.h"
+#include "assetRegistry.h"
 
 class Game
 {

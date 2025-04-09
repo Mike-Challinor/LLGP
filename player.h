@@ -35,8 +35,9 @@ private:
 
 	// Vectors
 	sf::Vector2f m_direction;
+	sf::Vector2f m_feetPosition;
 
-	//Ints
+	// Ints
 	int m_playerID;
 
 	// Floats
@@ -47,8 +48,8 @@ private:
 	bool m_isJumping = false;
 	bool m_canJump = true;
 	bool isFacingRight = true;
-	bool m_isMoving = true;
-	bool m_isGrounded = false;
+	bool m_isMoving = false;
+	bool m_isGrounded = true;
 
 	// Strings
 	std::string m_mountName;
@@ -64,10 +65,10 @@ private:
 	void InitAnimations();
 
 	// Collision check functions
-	bool checkLeftColl();
-	bool checkRightColl();
-	bool checkTopColl();
-	bool checkBottomColl();
+	bool CheckLeftColl();
+	bool CheckRightColl();
+	bool CheckTopColl();
+	bool CheckFeetColl();
 
 	// Sprite Functions
 	void FlipSprite();
@@ -77,6 +78,7 @@ private:
 	void Jump();
 	void ReduceJumpForce();
 	void UpdateMovementDirection();
+	void UpdateFeetPosition();
 
 	// Physics functions
 	void AddGravity();
@@ -94,12 +96,12 @@ public:
 	void OnKeyReleased(LLGP::Key key);
 
 	// Update functions
-	void updateInput();
-	void updateWindowsBoundCollision();
-	void update();
+	void UpdateInput();
+	void UpdateWindowsBoundCollision();
+	void Update();
 
 	// Render functions
-	void render(sf::RenderTarget& target);
+	void Render(sf::RenderTarget& target);
 
 };
 

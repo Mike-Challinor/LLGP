@@ -12,6 +12,8 @@ void LLGP::AssetRegistry::PopulateTextureMap(std::unordered_map<std::string, sf:
 	int currentXPos = starting_x_pos;
 	int currentYPos = starting_y_pos;
 
+	InitFonts();
+
 	// Loop through for each individual sprite
 	for (int i = 0; i < amount; i++)
 	{
@@ -25,6 +27,16 @@ void LLGP::AssetRegistry::PopulateTextureMap(std::unordered_map<std::string, sf:
 		currentXPos += texture_width;
 		currentXPos += padding;
 	}
+}
+
+void LLGP::AssetRegistry::InitFonts()
+{
+	/*
+	if (!m_joustFont.openFromFile("Resources/Fonts/JoustFont.otf"))
+	{
+		throw std::runtime_error("ERROR::ASSETREGISTRY::INITFONTS:: Failed to load JoustFontotf");
+	}*/
+	
 }
 
 void LLGP::AssetRegistry::StoreTextureMaps()
@@ -48,6 +60,11 @@ void LLGP::AssetRegistry::LoadSpriteSheet()
 	{
 		StoreTextureMaps();
 	}
+}
+
+sf::Font LLGP::AssetRegistry::GetFont()
+{
+	return m_joustFont;	
 }
 
 sf::Texture& LLGP::AssetRegistry::LoadTexture()
