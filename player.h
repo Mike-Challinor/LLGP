@@ -1,14 +1,13 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
 #include <chrono>
 #include <set>
 
 #include "Commons.h"
 #include "Constants.h"
 #include "InputManager.h"
-#include "AssetRegistry.h"
 #include "AnimationComponent.h"
+#include "GameObject.h"
 
 struct Animation
 {
@@ -16,20 +15,15 @@ struct Animation
 	int startingFrame;
 };
 
-class player
+class player : public GameObject
 {
 private:
 	
 	// Managers
 	LLGP::InputManager& m_inputManager; // Reference to an existing InputManager
-	LLGP::AssetRegistry& m_assetRegistry; // Reference to an existing AssetRegistry
 
 	// Animations
 	std::unordered_map<LLGP::AnimationState, Animation> m_animations;
-
-	// Shapes
-	sf::Texture m_texture;
-	sf::Sprite m_mountSprite;
 
 	std::unordered_map<std::string, sf::IntRect> m_playerSprites;
 
@@ -83,10 +77,13 @@ private:
 	// Physics functions
 	void AddGravity();
 
+	// Animation functions
+	void SetAnimationState();
+
 public:
 
 	// Constructors and Destructors
-	player(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry, float x = 10.f, float y = 10.f, int player_id = 0);
+	player(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry, float xPos = 10.f, float yPos = 10.f, int player_id = 0);
 	virtual ~player();
 
 	sf::IntRect GetSpriteRectByName(const std::string& name) const;
@@ -95,13 +92,21 @@ public:
 	void keyInputListener(LLGP::Key key);
 	void OnKeyReleased(LLGP::Key key);
 
+	// Accessor functions
+
+	// Mutation functions
+	void SetPosition(float xPos, float yPos);
+	void StopHorizontalMovement();
+	void StopJumpingMovement();
+	void StopFalling();
+
 	// Update functions
 	void UpdateInput();
 	void UpdateWindowsBoundCollision();
 	void Update();
 
 	// Render functions
-	void Render(sf::RenderTarget& target);
+	void Render(sf::RenderTarget& target) override;
 
 };
 

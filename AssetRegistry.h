@@ -16,6 +16,7 @@ namespace LLGP
 		std::unordered_map<std::string, sf::IntRect> m_ostrichTextures;
 		std::unordered_map<std::string, sf::IntRect> m_storkTextures;
 		std::unordered_map<std::string, sf::IntRect> m_vultureTextures;
+		std::unordered_map<std::string, sf::IntRect> m_platformTextures;
 
 		void PopulateTextureMap(std::unordered_map<std::string, sf::IntRect>& texture_map,
 			int amount,
@@ -33,6 +34,7 @@ namespace LLGP
 		void LoadSpriteSheet();
 		sf::Font GetFont();
 		const std::unordered_map<std::string, sf::IntRect>& LoadPlayerSprites(int player_id);
+		const std::unordered_map<std::string, sf::IntRect>& LoadPlatformSprites();
 		sf::Texture& LoadTexture();
 	};
 }

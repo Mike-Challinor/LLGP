@@ -4,9 +4,8 @@
 #include <string>
 
 enum class CollisionType {
-    Body,
-    Feet,
-    Attack,
+    Solid,
+    Trigger,
     Custom
 };
 

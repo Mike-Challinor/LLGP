@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "player.h"
+#include "platform.h"
 #include "assetRegistry.h"
 
 class Game
@@ -13,12 +14,11 @@ private:
 	LLGP::InputManager& m_inputManager;
 	LLGP::AssetRegistry& m_assetRegistry;
 
-	// Players
-	unique_ptr<player> m_playerClass1;
-	unique_ptr<player> m_playerClass2;
-
 	// Vectors
 	std::vector<std::unique_ptr<player>> m_players;
+	std::vector<std::unique_ptr<Platform>> m_platforms;
+
+	void HandlePlayerPlatformCollision(player& player, Platform& platform);
 
 public:
 	Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry);
