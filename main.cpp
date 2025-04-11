@@ -2,6 +2,7 @@
 #include <chrono>
 #include "Constants.h"
 #include "player.h"
+#include "Game.h"
 #include "AssetRegistry.h"
 
 using namespace std;
@@ -12,18 +13,16 @@ using namespace std;
 
 int WinMain()
 {
+    // Create window
     sf::VideoMode videoMode = sf::VideoMode({ SCREEN_WIDTH, SCREEN_HEIGHT });
     sf::RenderWindow window(videoMode, "SFML works!");
 
+    // Create references to classes
     LLGP::InputManager inputManager;
     LLGP::AssetRegistry assetRegistry;
+    unique_ptr<Game> gameInstance = make_unique<Game>(inputManager, assetRegistry);
 
-    assetRegistry.LoadSpriteSheet();
-
-    // Player ref
-    unique_ptr<player> playerClass1 = make_unique<player>(inputManager, assetRegistry, 10.f, 10.f, 1);
-    unique_ptr<player> playerClass2 = make_unique<player>(inputManager, assetRegistry, 180.f, 10.f, 2);
-
+    // Set variables for fixed update
     std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
     float deltaTime = 0;
     float timeSinceLastPhysicsLoop = 0;
@@ -31,6 +30,7 @@ int WinMain()
     float inputTimeStep = 2000;
     float timeSinceLastInputLoop = 0;
 
+    // Main loop
     while (window.isOpen())
     {
         // Update time related floats
@@ -42,18 +42,18 @@ int WinMain()
         // Physics loop (fixed update)
         while (timeSinceLastPhysicsLoop > physicsTimeStep)
         {
-            // Update the player
-            playerClass1->update(deltaTime);
-            playerClass2->update(deltaTime);
+            // Update the game
+            gameInstance->Update();
+
             timeSinceLastPhysicsLoop -= physicsTimeStep;
         }
 
         // Input loop (fixed update)
         while (timeSinceLastInputLoop > inputTimeStep)
         {
-            // Update players input
-            playerClass1->updateInput();
-            playerClass2->updateInput();
+            // Update games input
+            gameInstance->UpdateInputs();
+
             timeSinceLastInputLoop -= inputTimeStep;
         }
 
@@ -68,9 +68,8 @@ int WinMain()
         // Clear the screen
         window.clear();
         
-        // Render the player
-        playerClass1->render(window);
-        playerClass2->render(window);
+        // Render the game
+        gameInstance->Render(window);
 
         // Update the window
         window.display();

@@ -1,11 +1,15 @@
      #include "player.h"
 
 // Constructor
-player::player(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry, float x, float y, int player_id)
-	: m_inputManager(inputManager), m_assetRegistry(assetRegistry), m_mountSprite(m_texture)
+player::player(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry, float xPos, float yPos, int player_id)
+	: GameObject(assetRegistry, xPos, yPos),  // Initialize GameObject base class
+	m_inputManager(inputManager)
 {
 	// Set the players id
 	m_playerID = player_id;
+
+	// Initialize feet position to be at the bottom center of the player
+	UpdateFeetPosition();
 
 	// Add listeners for keys
 	if (m_playerID == 1)
@@ -39,31 +43,36 @@ player::player(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegis
 		inputManager.AddKeyReleasedListener(LLGP::Key::Right, this, [this]() { OnKeyReleased(LLGP::Key::Right); });
 	}
 
-	// Set players position
-	m_mountSprite.setPosition(sf::Vector2f(x, y));
-
 	// Get the ostrich/stork spritemap
 	m_texture = assetRegistry.LoadTexture();
 	m_playerSprites = assetRegistry.LoadPlayerSprites(m_playerID);
 
+	InitAnimations();
 
-	m_mountSprite.setTexture(m_texture);
+	m_sprite.setTexture(m_texture);
 
 	// Create pointer to the animation component
-	m_animationComponent = make_unique<LLGP::AnimationComponent>(m_mountSprite, m_mountName);
+	m_animationComponent = make_unique<LLGP::AnimationComponent>(m_sprite, m_mountName);
 
 	// Check for null pointer
 	if (m_animationComponent)
 	{
 		// Set the animation state if pointer is not null
-		m_animationComponent->SetAnimationState(LLGP::idle, m_playerSprites, 1);
+		m_animationComponent->SetAnimationState(LLGP::idle, m_playerSprites, m_animations[LLGP::AnimationState::idle].numberOfFrames
+			, m_animations[LLGP::AnimationState::idle].startingFrame
+		);
 	}
 	else
 	{
 		std::cerr << "AnimationComponent is not initialized!" << std::endl;
 	}
 
-	this->initVariables();
+	// Create collision shapes
+	auto bodyCollision = std::make_unique<CollisionComponent>();
+	bodyCollision->AddCollisionShape("body", m_sprite.getGlobalBounds(), CollisionType::Solid);
+	SetCollisionComponent(std::move(bodyCollision));
+
+	this->InitVariables();
 	
 }
 
@@ -100,15 +109,22 @@ sf::IntRect player::GetSpriteRectByName(const std::string& name) const
 }
 
 // Init functions
-void player::initVariables()
+void player::InitVariables()
 {
-	this->m_movementSpeed = MOVEMENTSPEED;
+	m_movementSpeed = MOVEMENTSPEED;
+}
+
+void player::InitAnimations()
+{
+	m_animations[LLGP::AnimationState::idle] = Animation{ 1, 0 };
+	m_animations[LLGP::AnimationState::walking] = Animation{ 4, 0 };
+	m_animations[LLGP::AnimationState::flying] = Animation{ 2, 5 };
 }
 
 // Collision Checks
-bool player::checkLeftColl()
+bool player::CheckLeftColl()
 {
-	if (m_mountSprite.getGlobalBounds().position.x <= 0.f)
+	if (m_sprite.getGlobalBounds().position.x <= 0.f)
 	{
 		return true;
 	}
@@ -118,9 +134,9 @@ bool player::checkLeftColl()
 	}
 }
 
-bool player::checkRightColl()
+bool player::CheckRightColl()
 {
-	if (m_mountSprite.getGlobalBounds().position.x + m_mountSprite.getGlobalBounds().size.x >= SCREEN_WIDTH)
+	if (m_sprite.getGlobalBounds().position.x + m_sprite.getGlobalBounds().size.x >= SCREEN_WIDTH)
 	{
 		return true;
 	}
@@ -130,9 +146,9 @@ bool player::checkRightColl()
 	}
 }
 
-bool player::checkTopColl()
+bool player::CheckTopColl()
 {
-	if (m_mountSprite.getGlobalBounds().position.y <= 0.f)
+	if (m_sprite.getGlobalBounds().position.y <= 0.f)
 	{
 		return true;
 	}
@@ -143,17 +159,18 @@ bool player::checkTopColl()
 	}
 }
 
-bool player::checkBottomColl()
+bool player::CheckFeetColl()
 {
-	if (m_mountSprite.getGlobalBounds().position.y + m_mountSprite.getGlobalBounds().size.y >= SCREEN_HEIGHT)
+	// Check if feet are colliding with the ground (using feet position)
+	if (m_feetPosition.y >= SCREEN_HEIGHT)
 	{
+		m_isGrounded = true;
+		m_isJumping = false;
+		m_canJump = true;
 		return true;
 	}
 
-	else
-	{
-		return false;
-	}
+	return false;
 }
 
 void player::FlipSprite()
@@ -162,19 +179,19 @@ void player::FlipSprite()
 	if (isFacingRight)
 	{
 		// Set the origin to the sprite's center (or appropriate pivot point)
-		m_mountSprite.setOrigin(sf::Vector2f(m_mountSprite.getLocalBounds().size.x, 0.f));
+		m_sprite.setOrigin(sf::Vector2f(m_sprite.getLocalBounds().size.x, 0.f));
 		// Set the scale to flip
-		m_mountSprite.setScale(sf::Vector2f(-1.f, 1.f));
+		m_sprite.setScale(sf::Vector2f(-1.f, 1.f));
 	}
 
 	// Flip sprite right
 	else
 	{
 		// Set the origin to the sprite's center (or appropriate pivot point)
-		m_mountSprite.setOrigin(sf::Vector2f(0.f, 0.f));
+		m_sprite.setOrigin(sf::Vector2f(0.f, 0.f));
 
 		// Set the scale to flip
-		m_mountSprite.setScale(sf::Vector2f(1.f, 1.f));
+		m_sprite.setScale(sf::Vector2f(1.f, 1.f));
 	}
 
 	isFacingRight = !isFacingRight;
@@ -182,60 +199,102 @@ void player::FlipSprite()
 
 void player::AddGravity()
 {
-	sf::Vector2f playerPos = m_mountSprite.getPosition();
+	sf::Vector2f playerPos = m_sprite.getPosition();
 
-	// Add gravity
-	if (playerPos.y + m_mountSprite.getGlobalBounds().size.y < SCREEN_HEIGHT)
+	// Add gravity if in the air
+	if (!CheckFeetColl())
 	{
-		// Set position with gravity added
-		m_mountSprite.setPosition(sf::Vector2f(playerPos.x, playerPos.y += GRAVITY));
+		// Player is in the air so set the y velocity to the gravity value
+		m_direction.y += GRAVITY;
 	}
 
+	// If grounded
 	else
 	{
-		m_canJump = true;
+		// player is grounded, so set the y velocity to 0
+		m_direction.y = 0;
+	}
+}
+
+void player::SetAnimationState()
+{
+	if (m_isJumping)
+	{
+		if (m_animationComponent->GetState() != LLGP::flying)
+		{
+			m_animationComponent->SetAnimationState(LLGP::flying, m_playerSprites, m_animations[LLGP::AnimationState::flying].numberOfFrames
+				, m_animations[LLGP::AnimationState::flying].startingFrame);
+		}
+	}
+
+	else if (m_isGrounded)
+	{
+		if (m_isMoving)
+		{
+			if (m_animationComponent->GetState() != LLGP::walking)
+			{
+				m_animationComponent->SetAnimationState(LLGP::walking, m_playerSprites, m_animations[LLGP::AnimationState::walking].numberOfFrames
+					, m_animations[LLGP::AnimationState::walking].startingFrame);
+			}
+		}
+
+		else
+		{
+			if (m_animationComponent->GetState() != LLGP::idle)
+			{
+				m_animationComponent->SetAnimationState(LLGP::idle, m_playerSprites, m_animations[LLGP::AnimationState::idle].numberOfFrames
+					, m_animations[LLGP::AnimationState::idle].startingFrame);
+			}
+		}
 	}
 }
 
 void player::Move()
 {
 	// Apply movement to the player sprite
-	m_mountSprite.setPosition(m_mountSprite.getPosition() + m_direction);
+	m_sprite.setPosition(m_sprite.getPosition() + m_direction);
 }
 
 void player::Jump()
 {
-	if (!m_isJumping)
+	if (!m_isJumping && m_canJump)
 	{
 		m_isJumping = true;
 		m_jumpForce = INITIAL_JUMP_FORCE;
 		m_canJump = false;
+		m_isGrounded = false;
 	}
+
+	ReduceJumpForce();
 }
 
 void player::ReduceJumpForce()
 {
-	// Adjust position
-	float yPos = m_mountSprite.getPosition().y;
-	float newYPos = yPos -= m_jumpForce;
-	m_mountSprite.setPosition(sf::Vector2f(m_mountSprite.getGlobalBounds().position.x, newYPos));
-
-
-	// Reduce jump force
-	m_jumpForce -= JUMP_FORCE_DECREMENT;
-
-	// Is jump force 0?
-	if (m_jumpForce <= 0.0f)
+	if (m_isJumping)
 	{
-		m_isJumping = false;
+		// Adjust position
+		float yPos = m_sprite.getPosition().y;
+		float newYPos = yPos -= m_jumpForce;
+		m_sprite.setPosition(sf::Vector2f(m_sprite.getGlobalBounds().position.x, newYPos));
+
+		// Reduce jump force
+		m_jumpForce -= JUMP_FORCE_DECREMENT;
+
+		UpdateFeetPosition();
+
+		// Stop jump when force has reached 0
+		if (m_jumpForce <= 0.0f)
+		{
+			StopJumpingMovement();
+		}
 	}
+	
 }
 
 void player::UpdateMovementDirection()
 {
 	if (m_activeKeys.count(LLGP::Key::A) || m_activeKeys.count(LLGP::Key::Left))
 	{
-		m_animationComponent->SetAnimationState(LLGP::walking, m_playerSprites, 4);
 
 		if (isFacingRight)
 		{
@@ -247,7 +306,6 @@ void player::UpdateMovementDirection()
 
 	else if (m_activeKeys.count(LLGP::Key::D) || m_activeKeys.count(LLGP::Key::Right))
 	{
-		m_animationComponent->SetAnimationState(LLGP::walking, m_playerSprites, 4);
 
 		if (!isFacingRight)
 		{
@@ -260,9 +318,16 @@ void player::UpdateMovementDirection()
 	else
 	{
 		m_direction = sf::Vector2f(0.f, 0.f);
-		m_animationComponent->SetAnimationState(LLGP::idle, m_playerSprites, 1);
 	}
 }
+
+void player::UpdateFeetPosition()
+{
+	// Update the feet position (the bottom center of the player)
+	m_feetPosition = sf::Vector2f(m_sprite.getPosition().x + m_sprite.getGlobalBounds().size.x / 2.f,
+		m_sprite.getPosition().y + m_sprite.getGlobalBounds().size.y);
+}
+
 
 void player::keyInputListener(LLGP::Key key)
 {
@@ -270,25 +335,13 @@ void player::keyInputListener(LLGP::Key key)
 
 	if (m_activeKeys.count(LLGP::Key::A) || m_activeKeys.count(LLGP::Key::Left))
 	{
-		m_animationComponent->SetAnimationState(LLGP::walking, m_playerSprites, 4);
-
-		if (isFacingRight)
-		{
-			FlipSprite();
-		}
-
+		m_isMoving = true;
 		m_direction = sf::Vector2f(-m_movementSpeed, 0.f);
 	}
 
 	else if (m_activeKeys.count(LLGP::Key::D) || m_activeKeys.count(LLGP::Key::Right))
 	{
-		m_animationComponent->SetAnimationState(LLGP::walking, m_playerSprites, 4);
-
-		if (!isFacingRight)
-		{
-			FlipSprite();
-		}
-
+		m_isMoving = true;
 		m_direction = sf::Vector2f(m_movementSpeed, 0.f);
 	}
 
@@ -314,16 +367,44 @@ void player::OnKeyReleased(LLGP::Key key)
 	}
 	else
 	{
-		// Only stop if no keys are held
-		m_direction = sf::Vector2f(0.f, 0.f);
-		m_animationComponent->SetAnimationState(LLGP::idle, m_playerSprites, 1);
+		m_isMoving = false;
+
+		if (!m_isJumping)
+		{
+			// Only stop if no keys are held
+			m_direction = sf::Vector2f(0.f, 0.f);
+		}
 	}
 }
 
+void player::SetPosition(float xPos, float yPos)
+{
+	m_sprite.setPosition(sf::Vector2f(xPos, yPos));
+}
 
+void player::StopHorizontalMovement()
+{
+	m_direction.x = 0.f;
+	m_isJumping = false;
+	m_canJump = true;
+}
+
+void player::StopJumpingMovement()
+{
+	m_isJumping = false;
+	m_canJump = true;
+}
+
+void player::StopFalling()
+{
+	m_direction.y = 0.f;
+	m_isGrounded = true;
+	m_isJumping = false;
+	m_canJump = true;	
+}
 
 // Update functions
-void player::updateInput()
+void player::UpdateInput()
 {
 	// Keyboard input
 	m_inputManager.Update();
@@ -332,58 +413,61 @@ void player::updateInput()
 	
 }
 
-void player::updateWindowsBoundCollision()
+void player::UpdateWindowsBoundCollision()
 {
 	// Left
-	if (this->checkLeftColl())
+	if (this->CheckLeftColl())
 	{
-		m_mountSprite.setPosition(sf::Vector2f(0.f, m_mountSprite.getGlobalBounds().position.y));
+		m_sprite.setPosition(sf::Vector2f(0.f, m_sprite.getGlobalBounds().position.y));
 	}
 
 	// Right
-	else if (this->checkRightColl())
+	else if (this->CheckRightColl())
 	{
-		m_mountSprite.setPosition(sf::Vector2f(SCREEN_WIDTH - m_mountSprite.getGlobalBounds().size.x, m_mountSprite.getGlobalBounds().position.y));
+		m_sprite.setPosition(sf::Vector2f(SCREEN_WIDTH - m_sprite.getGlobalBounds().size.x, m_sprite.getGlobalBounds().position.y));
 	}
 
 	// Top
-	if (this->checkTopColl())
+	if (this->CheckTopColl())
 	{
-		m_mountSprite.setPosition(sf::Vector2f(m_mountSprite.getGlobalBounds().position.x, 0.f));
+		m_sprite.setPosition(sf::Vector2f(m_sprite.getGlobalBounds().position.x, 0.f));
 	}
 
 	// Bottom
 
-	else if (this->checkBottomColl())
+	else if (this->CheckFeetColl())
 	{
-		m_mountSprite.setPosition(sf::Vector2f(m_mountSprite.getGlobalBounds().position.x, SCREEN_HEIGHT - m_mountSprite.getGlobalBounds().size.y));
+		m_sprite.setPosition(sf::Vector2f(m_sprite.getGlobalBounds().position.x, SCREEN_HEIGHT - m_sprite.getGlobalBounds().size.y));
 	}
 }
 
-void player::update(float deltaTime)
+void player::Update()
 {
+	SetAnimationState();
+
 	// Update animation component
 	m_animationComponent->Update();
 
 	// Update window bounds collision
-	this->updateWindowsBoundCollision();
-
-	// Reduce jump force if jumping
-	if (m_isJumping)
-	{
-		ReduceJumpForce();
-	}
-
-	// Apply movement
-	this->Move();
+	UpdateWindowsBoundCollision();
 
 	// Apply gravity to player
-	this->AddGravity();
+	AddGravity();
+
+	// Reduce jump force if jumping
+	ReduceJumpForce();
+
+	// Apply movement
+	Move();
+
+	// Update the players feet position
+	UpdateFeetPosition();
+
 }
 
 // Render functions
-void player::render(sf::RenderTarget& target)
+void player::Render(sf::RenderTarget& target)
 {
-	target.draw(this->m_mountSprite);
+	GameObject::Render(target);
 }
 

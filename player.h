@@ -1,32 +1,37 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
 #include <chrono>
 #include <set>
 
 #include "Commons.h"
 #include "Constants.h"
 #include "InputManager.h"
-#include "AssetRegistry.h"
 #include "AnimationComponent.h"
+#include "GameObject.h"
 
-class player
+struct Animation
+{
+	int numberOfFrames;
+	int startingFrame;
+};
+
+class player : public GameObject
 {
 private:
 	
 	// Managers
 	LLGP::InputManager& m_inputManager; // Reference to an existing InputManager
-	LLGP::AssetRegistry& m_assetRegistry; // Reference to an existing AssetRegistry
 
-	// Shapes
-	sf::Texture m_texture;
-	sf::Sprite m_mountSprite;
+	// Animations
+	std::unordered_map<LLGP::AnimationState, Animation> m_animations;
+
 	std::unordered_map<std::string, sf::IntRect> m_playerSprites;
 
 	// Vectors
 	sf::Vector2f m_direction;
+	sf::Vector2f m_feetPosition;
 
-	//Ints
+	// Ints
 	int m_playerID;
 
 	// Floats
@@ -37,7 +42,8 @@ private:
 	bool m_isJumping = false;
 	bool m_canJump = true;
 	bool isFacingRight = true;
-	bool m_isMoving = true;
+	bool m_isMoving = false;
+	bool m_isGrounded = true;
 
 	// Strings
 	std::string m_mountName;
@@ -49,13 +55,14 @@ private:
 	std::set<LLGP::Key> m_activeKeys; // Tracks current active keys
 
 	// Init functions
-	void initVariables();
+	void InitVariables();
+	void InitAnimations();
 
 	// Collision check functions
-	bool checkLeftColl();
-	bool checkRightColl();
-	bool checkTopColl();
-	bool checkBottomColl();
+	bool CheckLeftColl();
+	bool CheckRightColl();
+	bool CheckTopColl();
+	bool CheckFeetColl();
 
 	// Sprite Functions
 	void FlipSprite();
@@ -65,14 +72,18 @@ private:
 	void Jump();
 	void ReduceJumpForce();
 	void UpdateMovementDirection();
+	void UpdateFeetPosition();
 
 	// Physics functions
 	void AddGravity();
 
+	// Animation functions
+	void SetAnimationState();
+
 public:
 
 	// Constructors and Destructors
-	player(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry, float x = 10.f, float y = 10.f, int player_id = 0);
+	player(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry, float xPos = 10.f, float yPos = 10.f, int player_id = 0);
 	virtual ~player();
 
 	sf::IntRect GetSpriteRectByName(const std::string& name) const;
@@ -81,13 +92,21 @@ public:
 	void keyInputListener(LLGP::Key key);
 	void OnKeyReleased(LLGP::Key key);
 
+	// Accessor functions
+
+	// Mutation functions
+	void SetPosition(float xPos, float yPos);
+	void StopHorizontalMovement();
+	void StopJumpingMovement();
+	void StopFalling();
+
 	// Update functions
-	void updateInput();
-	void updateWindowsBoundCollision();
-	void update(float deltaTime);
+	void UpdateInput();
+	void UpdateWindowsBoundCollision();
+	void Update();
 
 	// Render functions
-	void render(sf::RenderTarget& target);
+	void Render(sf::RenderTarget& target) override;
 
 };
 

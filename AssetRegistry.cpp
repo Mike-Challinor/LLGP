@@ -12,6 +12,8 @@ void LLGP::AssetRegistry::PopulateTextureMap(std::unordered_map<std::string, sf:
 	int currentXPos = starting_x_pos;
 	int currentYPos = starting_y_pos;
 
+	InitFonts();
+
 	// Loop through for each individual sprite
 	for (int i = 0; i < amount; i++)
 	{
@@ -27,6 +29,16 @@ void LLGP::AssetRegistry::PopulateTextureMap(std::unordered_map<std::string, sf:
 	}
 }
 
+void LLGP::AssetRegistry::InitFonts()
+{
+	/*
+	if (!m_joustFont.openFromFile("Resources/Fonts/JoustFont.otf"))
+	{
+		throw std::runtime_error("ERROR::ASSETREGISTRY::INITFONTS:: Failed to load JoustFontotf");
+	}*/
+	
+}
+
 void LLGP::AssetRegistry::StoreTextureMaps()
 {
 	// Load the ostrich textures
@@ -34,6 +46,9 @@ void LLGP::AssetRegistry::StoreTextureMaps()
 
 	// Load the stork textures
 	PopulateTextureMap(m_storkTextures, 7, "stork", 28, 40, 2, 76, 4);
+
+	// Load the platform textures
+	PopulateTextureMap(m_platformTextures, 1, "platform", 65, 14, 0, 640, 0);
 }
 
 void LLGP::AssetRegistry::LoadSpriteSheet()
@@ -48,6 +63,11 @@ void LLGP::AssetRegistry::LoadSpriteSheet()
 	{
 		StoreTextureMaps();
 	}
+}
+
+sf::Font LLGP::AssetRegistry::GetFont()
+{
+	return m_joustFont;	
 }
 
 sf::Texture& LLGP::AssetRegistry::LoadTexture()
@@ -71,4 +91,9 @@ const std::unordered_map<std::string, sf::IntRect>& LLGP::AssetRegistry::LoadPla
 		throw std::runtime_error("Player ID is invalid, unable to load player sprites");
 	}
 	
+}
+
+const std::unordered_map<std::string, sf::IntRect>& LLGP::AssetRegistry::LoadPlatformSprites()
+{
+	return m_platformTextures;
 }
