@@ -3,6 +3,11 @@
 GameObject::GameObject(LLGP::AssetRegistry& assetRegistry, float xPos, float yPos) : m_sprite(m_texture), m_assetRegistry(assetRegistry)
 {
 	m_sprite.setPosition(sf::Vector2f(xPos, yPos)); // Set initial position
+
+	// Create collision shapes
+	auto bodyCollision = std::make_unique<CollisionComponent>();
+	bodyCollision->AddCollisionShape("body", m_sprite.getGlobalBounds(), CollisionType::Solid);
+	SetCollisionComponent(std::move(bodyCollision));
 }
 
 GameObject::~GameObject()

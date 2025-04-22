@@ -2,62 +2,63 @@
 
 // Constructor
 player::player(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry, float xPos, float yPos, int player_id)
-	: GameObject(assetRegistry, xPos, yPos),  // Initialize GameObject base class
+	: Character(assetRegistry, xPos, yPos),  // Initialize GameObject base class
 	m_inputManager(inputManager)
 {
 	// Set the players id
 	m_playerID = player_id;
 
-	// Initialize feet position to be at the bottom center of the player
-	UpdateFeetPosition();
-
 	// Add listeners for keys
 	if (m_playerID == 1)
 	{
-		m_mountName = "ostrich";
+		m_objectName = "ostrich";
 
-		// Key press listeners
-		inputManager.AddKeyPressListener(LLGP::Key::W, this, [this]() { keyInputListener(LLGP::Key::W); });
-		inputManager.AddKeyPressListener(LLGP::Key::A, this, [this]() { keyInputListener(LLGP::Key::A); });
-		inputManager.AddKeyPressListener(LLGP::Key::D, this, [this]() { keyInputListener(LLGP::Key::D); });
-
-		// Key release listeners
-		inputManager.AddKeyReleasedListener(LLGP::Key::W, this, [this]() { OnKeyReleased(LLGP::Key::W); });
-		inputManager.AddKeyReleasedListener(LLGP::Key::A, this, [this]() { OnKeyReleased(LLGP::Key::A); });
-		inputManager.AddKeyReleasedListener(LLGP::Key::D, this, [this]() { OnKeyReleased(LLGP::Key::D); });
+		// Set usable keys
+		m_usableKeys = {
+			LLGP::Key::W,
+			LLGP::Key::A,
+			LLGP::Key::D
+		};
 
 	}
 
 	else if (m_playerID == 2)
 	{
-		m_mountName = "stork";
+		m_objectName = "stork";
 
+		// Set usable keys
+		m_usableKeys = {
+			LLGP::Key::Up,
+			LLGP::Key::Left,
+			LLGP::Key::Right
+		};
+	}
+
+	// Set the key listeners
+	for (const auto& key : m_usableKeys)
+	{
 		// Key press listeners
-		inputManager.AddKeyPressListener(LLGP::Key::Up, this, [this]() { keyInputListener(LLGP::Key::Up); });
-		inputManager.AddKeyPressListener(LLGP::Key::Left, this, [this]() { keyInputListener(LLGP::Key::Left); });
-		inputManager.AddKeyPressListener(LLGP::Key::Right, this, [this]() { keyInputListener(LLGP::Key::Right); });
+		inputManager.AddKeyPressListener(key, this, [this, key]() { keyInputListener(key); });
 
 		// Key release listeners
-		inputManager.AddKeyReleasedListener(LLGP::Key::Up, this, [this]() { OnKeyReleased(LLGP::Key::Up); });
-		inputManager.AddKeyReleasedListener(LLGP::Key::Left, this, [this]() { OnKeyReleased(LLGP::Key::Left); });
-		inputManager.AddKeyReleasedListener(LLGP::Key::Right, this, [this]() { OnKeyReleased(LLGP::Key::Right); });
+		inputManager.AddKeyReleasedListener(key, this, [this, key]() { OnKeyReleased(key); });
 	}
 
 	// Get the ostrich/stork spritemap
 	m_texture = assetRegistry.LoadTexture();
 	m_playerSprites = assetRegistry.LoadPlayerSprites(m_playerID);
 
-	InitAnimations();
-
 	m_sprite.setTexture(m_texture);
 
 	// Create pointer to the animation component
-	m_animationComponent = make_unique<LLGP::AnimationComponent>(m_sprite, m_mountName);
+	m_animationComponent = make_unique<LLGP::AnimationComponent>(m_sprite, m_objectName);
+
+	InitAnimations();
 
 	// Check for null pointer
 	if (m_animationComponent)
 	{
-		// Set the animation state if pointer is not null
+		// Set the animation state to idle if pointer is not null
 		m_animationComponent->SetAnimationState(LLGP::idle, m_playerSprites, m_animations[LLGP::AnimationState::idle].numberOfFrames
 			, m_animations[LLGP::AnimationState::idle].startingFrame
 		);
@@ -65,53 +66,21 @@ player::player(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegis
 	else
 	{
 		std::cerr << "AnimationComponent is not initialized!" << std::endl;
-	}
-
-	// Create collision shapes
-	auto bodyCollision = std::make_unique<CollisionComponent>();
-	bodyCollision->AddCollisionShape("body", m_sprite.getGlobalBounds(), CollisionType::Solid);
-	SetCollisionComponent(std::move(bodyCollision));
-
-	this->InitVariables();
-	
+	}	
 }
 
 // Destructor
 player::~player()
 {
-	// Remove key press listeners
-	m_inputManager.RemoveKeyPressListener(LLGP::Key::W, this, [this]() { keyInputListener(LLGP::Key::W); });
-	m_inputManager.RemoveKeyPressListener(LLGP::Key::A, this, [this]() { keyInputListener(LLGP::Key::A); });
-	m_inputManager.RemoveKeyPressListener(LLGP::Key::D, this, [this]() { keyInputListener(LLGP::Key::D); });
-	m_inputManager.RemoveKeyPressListener(LLGP::Key::Up, this, [this]() { keyInputListener(LLGP::Key::Up); });
-	m_inputManager.RemoveKeyPressListener(LLGP::Key::Left, this, [this]() { keyInputListener(LLGP::Key::Left); });
-	m_inputManager.RemoveKeyPressListener(LLGP::Key::Right, this, [this]() { keyInputListener(LLGP::Key::Right); });
-
-	// Remove key released listeners
-	m_inputManager.RemoveKeyReleasedListener(LLGP::Key::W, this, [this]() { OnKeyReleased(LLGP::Key::W); });
-	m_inputManager.RemoveKeyReleasedListener(LLGP::Key::A, this, [this]() { OnKeyReleased(LLGP::Key::A); });
-	m_inputManager.RemoveKeyReleasedListener(LLGP::Key::D, this, [this]() { OnKeyReleased(LLGP::Key::D); });
-	m_inputManager.RemoveKeyReleasedListener(LLGP::Key::Up, this, [this]() { OnKeyReleased(LLGP::Key::Up); });
-	m_inputManager.RemoveKeyReleasedListener(LLGP::Key::Left, this, [this]() { OnKeyReleased(LLGP::Key::Left); });
-	m_inputManager.RemoveKeyReleasedListener(LLGP::Key::Right, this, [this]() { OnKeyReleased(LLGP::Key::Right); });
-}
-
-sf::IntRect player::GetSpriteRectByName(const std::string& name) const
-{
-	auto it = m_playerSprites.find(name);
-	if (it != m_playerSprites.end())
+	// Set the key listeners
+	for (const auto& key : m_usableKeys)
 	{
-		return it->second; // Found the sprite
+		// Remove key press listeners
+		m_inputManager.RemoveKeyPressListener(key, this, [this, key]() { keyInputListener(key); });
+
+		// Remove key released listeners
+		m_inputManager.RemoveKeyReleasedListener(key, this, [this, key]() { keyInputListener(key); });
 	}
-
-	// Handle missing sprite
-	throw std::runtime_error("Sprite not found: " + name);
-}
-
-// Init functions
-void player::InitVariables()
-{
-	m_movementSpeed = MOVEMENTSPEED;
 }
 
 void player::InitAnimations()
@@ -169,32 +138,7 @@ bool player::CheckFeetColl()
 		m_canJump = true;
 		return true;
 	}
-
 	return false;
-}
-
-void player::FlipSprite()
-{
-	// Flip sprite left
-	if (isFacingRight)
-	{
-		// Set the origin to the sprite's center (or appropriate pivot point)
-		m_sprite.setOrigin(sf::Vector2f(m_sprite.getLocalBounds().size.x, 0.f));
-		// Set the scale to flip
-		m_sprite.setScale(sf::Vector2f(-1.f, 1.f));
-	}
-
-	// Flip sprite right
-	else
-	{
-		// Set the origin to the sprite's center (or appropriate pivot point)
-		m_sprite.setOrigin(sf::Vector2f(0.f, 0.f));
-
-		// Set the scale to flip
-		m_sprite.setScale(sf::Vector2f(1.f, 1.f));
-	}
-
-	isFacingRight = !isFacingRight;
 }
 
 void player::AddGravity()
@@ -296,7 +240,7 @@ void player::UpdateMovementDirection()
 	if (m_activeKeys.count(LLGP::Key::A) || m_activeKeys.count(LLGP::Key::Left))
 	{
 
-		if (isFacingRight)
+		if (m_isFacingRight)
 		{
 			FlipSprite();
 		}
@@ -307,7 +251,7 @@ void player::UpdateMovementDirection()
 	else if (m_activeKeys.count(LLGP::Key::D) || m_activeKeys.count(LLGP::Key::Right))
 	{
 
-		if (!isFacingRight)
+		if (!m_isFacingRight)
 		{
 			FlipSprite();
 		}
@@ -320,14 +264,6 @@ void player::UpdateMovementDirection()
 		m_direction = sf::Vector2f(0.f, 0.f);
 	}
 }
-
-void player::UpdateFeetPosition()
-{
-	// Update the feet position (the bottom center of the player)
-	m_feetPosition = sf::Vector2f(m_sprite.getPosition().x + m_sprite.getGlobalBounds().size.x / 2.f,
-		m_sprite.getPosition().y + m_sprite.getGlobalBounds().size.y);
-}
-
 
 void player::keyInputListener(LLGP::Key key)
 {
@@ -375,32 +311,6 @@ void player::OnKeyReleased(LLGP::Key key)
 			m_direction = sf::Vector2f(0.f, 0.f);
 		}
 	}
-}
-
-void player::SetPosition(float xPos, float yPos)
-{
-	m_sprite.setPosition(sf::Vector2f(xPos, yPos));
-}
-
-void player::StopHorizontalMovement()
-{
-	m_direction.x = 0.f;
-	m_isJumping = false;
-	m_canJump = true;
-}
-
-void player::StopJumpingMovement()
-{
-	m_isJumping = false;
-	m_canJump = true;
-}
-
-void player::StopFalling()
-{
-	m_direction.y = 0.f;
-	m_isGrounded = true;
-	m_isJumping = false;
-	m_canJump = true;	
 }
 
 // Update functions

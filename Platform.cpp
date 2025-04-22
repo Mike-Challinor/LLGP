@@ -21,8 +21,3 @@ Platform::~Platform()
 {
 
 }
-
-void Platform::Render(sf::RenderTarget& target)
-{
-	GameObject::Render(target);
-}

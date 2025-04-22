@@ -15,7 +15,7 @@ public:
 
 	// Accessors and Mutators
 	CollisionComponent* GetCollisionComponent() const;
-#
+
 	// Render functions
 	virtual void Render(sf::RenderTarget& target);
 
