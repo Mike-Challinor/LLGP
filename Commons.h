@@ -1,8 +1,12 @@
 #pragma once
 using namespace std;
 
-const float MOVEMENTSPEED = 0.5;
-const float GRAVITY = 0.3;
+const float PLAYER_MAX_HORIZONTAL_MOVEMENTSPEED = 0.5f;
+const float PLAYER_MAX_VERTICAL_MOVEMENTSPEED = 0.5f;
+const float ENEMY_MAX_WALKING_SPEED = 0.25f;
+const float ENEMY_MAX_FLYING_VERTICAL_SPEED = 0.35f;
+const float ENEMY_MAX_FLYING_HORIZONTAL_SPEED = 0.35f;
+const float GRAVITY = 0.2f;
 
 enum FACING
 {

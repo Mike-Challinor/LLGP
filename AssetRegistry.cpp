@@ -39,6 +39,16 @@ void LLGP::AssetRegistry::InitFonts()
 	
 }
 
+void LLGP::AssetRegistry::AddSpriteToMap(std::unordered_map<std::string, sf::IntRect>& texture_map, 
+	const std::string& name, int xPos, int yPos, int width, int height)
+{
+	// Set the temp int rect
+	sf::IntRect tempIntRect({ xPos, yPos }, { width , height });
+
+	// Add to the unordered map
+	texture_map.insert({ name + std::to_string(texture_map.size()), tempIntRect });
+}
+
 void LLGP::AssetRegistry::StoreTextureMaps()
 {
 	// Load the ostrich textures
@@ -48,13 +58,23 @@ void LLGP::AssetRegistry::StoreTextureMaps()
 	PopulateTextureMap(m_storkTextures, 7, "stork", 28, 40, 2, 76, 4);
 
 	// Load the platform textures
-	PopulateTextureMap(m_platformTextures, 1, "platform", 65, 14, 0, 640, 0);
+	AddSpriteToMap(m_bottom_platformTextures, "bottom_platform", 0, 704, 372, 60); // Bottom platform
+	AddSpriteToMap(m_top_left_platformTextures, "top_left_platform", 0, 640, 65, 14); // Top left platform
+	AddSpriteToMap(m_bottom_left_platformTextures, "bottom_left_platform", 384, 640, 126, 16); // Bottom left platform
+	AddSpriteToMap(m_bottom_middle_platformTextures, "bottom_middle_platform", 736, 640, 128, 16); // Bottom left platform
+
+	// Load the vulture textures
+	PopulateTextureMap(m_enemyTextures, 4, "enemy", 30, 28, 2, 149, 1);
+	AddSpriteToMap(m_enemyTextures, "enemy", 128, 150, 28, 26); // Sliding sprite
+	AddSpriteToMap(m_enemyTextures, "enemy", 160, 152, 32, 16); // Flying sprite 1
+	AddSpriteToMap(m_enemyTextures, "enemy", 192, 144, 33, 26); // Flying sprite 2
+
 }
 
 void LLGP::AssetRegistry::LoadSpriteSheet()
 {
 	// Set player texture
-	if (!this->m_spriteSheet.loadFromFile("Resources/Sprites/JoustSpriteSheet.png"))
+	if (!this->m_spriteSheet.loadFromFile("Resources/Sprites/JoustSpriteSheet2.png"))
 	{
 		throw std::runtime_error("Failed to load texture: joustsprites.png");
 	}
@@ -75,25 +95,44 @@ sf::Texture& LLGP::AssetRegistry::LoadTexture()
 	return m_spriteSheet;
 }
 
-const std::unordered_map<std::string, sf::IntRect>& LLGP::AssetRegistry::LoadPlayerSprites(int player_id)
-{
-	switch (player_id)
-	{
-	case 1: 
-		return m_ostrichTextures;
-		break;
-
-	case 2:
-		return m_storkTextures;
-		break;
-
-	default:
-		throw std::runtime_error("Player ID is invalid, unable to load player sprites");
-	}
-	
-}
-
 const std::unordered_map<std::string, sf::IntRect>& LLGP::AssetRegistry::LoadPlatformSprites()
 {
-	return m_platformTextures;
+	return m_top_left_platformTextures;
+}
+
+const std::unordered_map<std::string, sf::IntRect>& LLGP::AssetRegistry::LoadSprites(sf::String name)
+{
+	if (name == "ostrich")
+	{
+		return m_ostrichTextures;
+	}
+	else if (name == "stork")
+	{
+		return m_storkTextures;
+	}
+	else if (name == "bottom_platform")
+	{
+		return m_bottom_platformTextures;
+	}
+	else if (name == "top_left_platform")
+	{
+		return m_top_left_platformTextures;
+	}
+	else if (name == "bottom_left_platform")
+	{
+		return m_bottom_left_platformTextures;
+	}
+	else if (name == "bottom_middle_platform")
+	{
+		return m_bottom_middle_platformTextures;
+	}
+	else if (name == "enemy" || name == "bounder" || name == "hunter" || name == "shadowlord")
+	{
+		return m_enemyTextures;
+	}
+	else
+	{
+		throw std::runtime_error("Invalid sprite name provided to LoadSprites: " + name);
+	}
+
 }
