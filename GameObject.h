@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <SFML/Graphics.hpp>
 
 #include "AssetRegistry.h"
@@ -10,7 +11,7 @@ class GameObject
 public:
 
 	// Constructor & Destructor
-	GameObject(LLGP::AssetRegistry& assetRegistry, float xPos, float yPos);
+	GameObject(LLGP::AssetRegistry& assetRegistry, float xPos, float yPos, const std::string& objectName);
 	virtual ~GameObject();
 
 	// Accessors and Mutators
@@ -29,6 +30,9 @@ protected:
 	// Shapes
 	sf::Sprite m_sprite;
 	sf::Texture m_texture;
+
+	// Strings
+	std::string m_objectName;
 
 	// Maps
 	std::unordered_map<std::string, sf::IntRect> m_textureMap;

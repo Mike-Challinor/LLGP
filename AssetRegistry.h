@@ -15,8 +15,11 @@ namespace LLGP
 
 		std::unordered_map<std::string, sf::IntRect> m_ostrichTextures;
 		std::unordered_map<std::string, sf::IntRect> m_storkTextures;
-		std::unordered_map<std::string, sf::IntRect> m_vultureTextures;
-		std::unordered_map<std::string, sf::IntRect> m_platformTextures;
+		std::unordered_map<std::string, sf::IntRect> m_enemyTextures;
+		std::unordered_map<std::string, sf::IntRect> m_bottom_platformTextures;
+		std::unordered_map<std::string, sf::IntRect> m_top_left_platformTextures;
+		std::unordered_map<std::string, sf::IntRect> m_bottom_left_platformTextures;
+		std::unordered_map<std::string, sf::IntRect> m_bottom_middle_platformTextures;
 
 		void PopulateTextureMap(std::unordered_map<std::string, sf::IntRect>& texture_map,
 			int amount,
@@ -27,14 +30,15 @@ namespace LLGP
 			int starting_y_pos,
 			int padding);
 
+		void AddSpriteToMap(std::unordered_map<std::string, sf::IntRect>& texture_map, const std::string& name, int xPos, int yPos, int width, int height);
 		void StoreTextureMaps();
 		void InitFonts();
 
 	public:
 		void LoadSpriteSheet();
 		sf::Font GetFont();
-		const std::unordered_map<std::string, sf::IntRect>& LoadPlayerSprites(int player_id);
 		const std::unordered_map<std::string, sf::IntRect>& LoadPlatformSprites();
+		const std::unordered_map<std::string, sf::IntRect>& LoadSprites(sf::String name);
 		sf::Texture& LoadTexture();
 	};
 }

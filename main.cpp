@@ -43,7 +43,7 @@ int WinMain()
         while (timeSinceLastPhysicsLoop > physicsTimeStep)
         {
             // Update the game
-            gameInstance->Update();
+            gameInstance->Update(deltaTime);
 
             timeSinceLastPhysicsLoop -= physicsTimeStep;
         }
