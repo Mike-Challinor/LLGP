@@ -14,7 +14,6 @@ public:
 private:
 
 	// Functions
-	void FindTarget() override;
 	void DecideNextMove() override;
 };
 

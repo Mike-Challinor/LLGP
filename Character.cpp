@@ -328,6 +328,32 @@ sf::Vector2f Character::GetPosition()
 	return m_sprite.getGlobalBounds().position;
 }
 
+sf::Vector2f Character::GetVelocity() const
+{
+	return m_velocity;
+}
+
+void Character::SetVelocity(const sf::Vector2f newVelocity)
+{
+	m_velocity = newVelocity;
+}
+
+void Character::UpdateCollisionCooldown(float deltaTime)
+{
+	if (m_collisionCooldown > 0.f)
+		m_collisionCooldown -= deltaTime;
+}
+
+bool Character::GetCanCollide() const
+{
+	return m_collisionCooldown <= 0.f;
+}
+
+void Character::ResetCollisionCooldown()
+{
+	m_collisionCooldown = m_maxCollisionCooldown;
+}
+
 void Character::Update(float deltaTime)
 {
 	
@@ -357,5 +383,7 @@ void Character::Update(float deltaTime)
 	// Update the players feet position
 	UpdateFeetPosition();
 
+	// Update the cooldown of collisions
+	UpdateCollisionCooldown(deltaTime);
 	
 }
