@@ -6,22 +6,13 @@ Bounder::Bounder(LLGP::AssetRegistry& assetRegistry, float xPos, float yPos, con
     FindTarget();
 }
 
-void Bounder::FindTarget()
-{
-    // Simple target selection for now (just fly across screen)
-    if (m_sprite.getPosition().x < SCREEN_WIDTH / 2.f)
-    {
-        SetTarget({ SCREEN_WIDTH + 100.f, static_cast<float>(rand() % SCREEN_HEIGHT) });
-    }
-    else
-    {
-        SetTarget({ -100.f, static_cast<float>(rand() % SCREEN_HEIGHT) });
-    }
-}
-
 void Bounder::DecideNextMove()
 {
-
+    // If the enemy has collided, find a new target
+    if (m_hasCollided)
+    {
+        FindTarget();
+    }
 }
 
 void Bounder::Update(float deltaTime)

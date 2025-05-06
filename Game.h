@@ -9,6 +9,7 @@
 #include "Bounder.h"
 #include "Hunter.h"
 #include "assetRegistry.h"
+#include "CollisionManager.h"
 
 class Game
 {
@@ -23,7 +24,6 @@ private:
 	std::vector<std::unique_ptr<Enemy>> m_enemies;
 	std::vector<sf::Vector2f> m_spawnPositions;
 
-	void HandlePlayerPlatformCollision(Character& character, Platform& platform);
 	sf::Vector2f GetRandomSpawnLocation();
 	void SpawnEnemy();
 

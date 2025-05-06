@@ -25,7 +25,6 @@ public:
 	void Spawn();
 
 	// Mutation functions
-	void SetPosition(float xPos, float yPos);
 	void StopHorizontalMovement();
 	void StopJumpingMovement();
 	void StopFalling();
@@ -34,8 +33,18 @@ public:
 	bool GetIsSpawning();
 	bool GetIsFalling();
 	sf::Vector2f GetPosition();
+	sf::Vector2f GetVelocity() const;
+	bool GetCanCollide() const;
 
+	// Modifier functions
+	void SetVelocity(const sf::Vector2f newVelocity);
+	void SetPosition(float xPos, float yPos);
+	void FlipSprite();
+	void ResetCollisionCooldown();
+
+	// Update Functions
 	virtual void Update(float deltaTime);
+	void UpdateCollisionCooldown(float deltaTime);
 
 protected:
 	// Vectors
@@ -69,7 +78,6 @@ protected:
 	virtual void InitVariables();
 	void UpdateFeetPosition();
 	virtual void InitAnimations() = 0;
-	void FlipSprite();
 	void SetAnimationState();
 	void StopSpawning();
 
@@ -94,6 +102,11 @@ protected:
 
 private:
 
+	// Floats
+	float m_collisionCooldown = 0.f;
+	const float m_maxCollisionCooldown = 150000.f; // 1.5 seconds
+
+	// Functions
 	void CreateAnimationComponent(sf::Sprite& sprite, const std::string& name);
 };
 

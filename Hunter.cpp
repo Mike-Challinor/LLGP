@@ -43,9 +43,19 @@ void Hunter::FindTarget()
 }
 
 void Hunter::DecideNextMove()
-{
-    // Continuously re-target the player
-    FindTarget();
+{   
+    if (m_hasCollided)
+    {
+        // Find a target off screen
+        Enemy::FindTarget();
+    }
+
+    else
+    {
+        // Continuously re-target the player
+        FindTarget();
+    }
+    
 }
 
 void Hunter::Update(float deltaTime)

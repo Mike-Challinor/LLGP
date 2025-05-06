@@ -14,6 +14,7 @@ public:
 
 	// Functions
 	virtual void DecideNextMove();
+	void ResetTarget();
 
 private:
 	// Vectors
@@ -27,6 +28,9 @@ private:
 protected:
 	// Floats
 	float m_verticalMovementSpeed;
+
+	// Bools
+	bool m_hasCollided = false;
 
 	// Mutator Functions
 	void SetTarget(sf::Vector2f targetPosition);

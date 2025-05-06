@@ -10,3 +10,4 @@
 
 const float JUMP_FORCE_DECREMENT = 0.01f;
 const float INITIAL_JUMP_FORCE = 1.3f;
+const float BOUNCE_MULTIPLIER = 2.0f;

@@ -87,6 +87,15 @@ void Enemy::MoveToTarget()
 
 void Enemy::FindTarget()
 {
+	// Simple target selection for now (just fly across screen)
+	if (m_sprite.getPosition().x < SCREEN_WIDTH / 2.f)
+	{
+		SetTarget({ SCREEN_WIDTH + 100.f, static_cast<float>(rand() % SCREEN_HEIGHT) });
+	}
+	else
+	{
+		SetTarget({ -100.f, static_cast<float>(rand() % SCREEN_HEIGHT) });
+	}
 }
 
 void Enemy::Update(float deltaTime)
@@ -99,4 +108,9 @@ void Enemy::Update(float deltaTime)
 void Enemy::DecideNextMove()
 {
 
+}
+
+void Enemy::ResetTarget()
+{
+	m_hasCollided = true;
 }

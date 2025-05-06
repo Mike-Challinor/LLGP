@@ -37,54 +37,6 @@ Game::~Game()
 {
 }
 
-void Game::HandlePlayerPlatformCollision(Character& character, Platform& platform)
-{
-    sf::FloatRect playerBounds = character.GetCollisionBounds();
-    sf::FloatRect platformBounds = platform.GetCollisionBounds();
-
-
-    if (playerBounds.findIntersection(platformBounds).has_value())
-    {
-        // Center points
-        float dx = (playerBounds.position.x + playerBounds.size.x / 2) - (platformBounds.position.x + platformBounds.size.x / 2);
-        float dy = (playerBounds.position.y + playerBounds.size.y / 2) - (platformBounds.position.y + platformBounds.size.y / 2);
-
-        float overlapX = (playerBounds.size.x + platformBounds.size.x) / 2 - std::abs(dx);
-        float overlapY = (playerBounds.size.y + platformBounds.size.y) / 2 - std::abs(dy);
-
-        if (overlapX < overlapY)
-        {
-            // Horizontal collision
-            if (dx > 0)
-            {
-                // Colliding from right
-                character.SetPosition(platformBounds.position.x + platformBounds.size.x, playerBounds.position.y);
-            }
-            else
-            {
-                // Colliding from left
-                character.SetPosition(platformBounds.position.x - playerBounds.size.x, playerBounds.position.y);
-            }
-            character.StopHorizontalMovement();
-        }
-        else
-        {
-            if (dy > 0)
-            {
-                // Hitting from below
-                character.SetPosition(playerBounds.position.x, platformBounds.position.y + platformBounds.size.y);
-                character.StopJumpingMovement();
-            }
-            else
-            {
-                // Landing on top
-                character.SetPosition(playerBounds.position.x, platformBounds.position.y - playerBounds.size.y);
-                character.StopFalling();
-            }
-        }
-    }
-}
-
 sf::Vector2f Game::GetRandomSpawnLocation()
 {
     // Set position to 0,0 if there are no spawn locations
@@ -117,43 +69,46 @@ void Game::SpawnEnemy()
 
     m_enemies.push_back(std::make_unique<Bounder>(m_assetRegistry, spawnPos.x - 14.f, spawnPos.y, "enemy"));
     Enemy& enemy2 = *m_enemies.back();
-    enemy2.Spawn();
+    enemy.Spawn();
 
 }
 
 
 void Game::Update(float deltaTime)
 {
-	for (auto& player : m_players)
-	{
-		player->Update(deltaTime);
-	}
+    std::vector<Character*> characters; // Create a vector for all current characters
 
-    for (auto& vulture : m_enemies)
-    {
-        vulture->Update(deltaTime);
-    }
-
-    // Handle collisions between each player and all platforms
     for (auto& player : m_players)
-    {
-        for (auto& platform : m_platforms)
-        {
-            HandlePlayerPlatformCollision(*player, *platform);
-        }
-    }
+        characters.push_back(player.get());
 
-    // Handle collisions between each vulture and all platforms
     for (auto& enemy : m_enemies)
+        characters.push_back(enemy.get());
+
+    for (auto* character : characters)
     {
-        if (!enemy->GetIsSpawning()) // Only handle collisions if the vulture is not spawning
+        character->Update(deltaTime);
+
+        if (!character->GetIsSpawning())
         {
             for (auto& platform : m_platforms)
             {
-                HandlePlayerPlatformCollision(*enemy, *platform);
+                CollisionManager::HandlePlatformCollision(*character, *platform);
             }
         }
     }
+
+    // Character-vs-character collisions (optional now, easy to add):
+    for (size_t i = 0; i < characters.size(); ++i)
+    {
+        for (size_t j = i + 1; j < characters.size(); ++j)
+        {
+            if (!characters[i]->GetIsSpawning() && !characters[j]->GetIsSpawning())
+            {
+                CollisionManager::HandleCharacterCollision(*characters[i], *characters[j]);
+            }
+        }
+    }
+
 }
 
 void Game::UpdateInputs()
