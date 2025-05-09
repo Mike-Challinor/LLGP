@@ -2,6 +2,7 @@
 
 #include <unordered_map>
 #include <string>
+#include <random>
 #include <SFML/Graphics.hpp>
 
 namespace LLGP
@@ -16,6 +17,7 @@ namespace LLGP
 		std::unordered_map<std::string, sf::IntRect> m_ostrichTextures;
 		std::unordered_map<std::string, sf::IntRect> m_storkTextures;
 		std::unordered_map<std::string, sf::IntRect> m_enemyTextures;
+		std::unordered_map<std::string, sf::IntRect> m_riderTextures;
 		std::unordered_map<std::string, sf::IntRect> m_bottom_platformTextures;
 		std::unordered_map<std::string, sf::IntRect> m_top_left_platformTextures;
 		std::unordered_map<std::string, sf::IntRect> m_bottom_left_platformTextures;
@@ -39,6 +41,7 @@ namespace LLGP
 		sf::Font GetFont();
 		const std::unordered_map<std::string, sf::IntRect>& LoadPlatformSprites();
 		const std::unordered_map<std::string, sf::IntRect>& LoadSprites(sf::String name);
+		const sf::IntRect& LoadSprite(const std::string& name);
 		sf::Texture& LoadTexture();
 	};
 }

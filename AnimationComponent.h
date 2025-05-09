@@ -67,6 +67,8 @@ namespace LLGP
 			int numberOfFrames, int startingFrame, float frameTime = 0.1f);
 		AnimationState GetState();
 
+		int GetCurrentFrame();
+
 		void Update(float deltaTime);
 	};
 }

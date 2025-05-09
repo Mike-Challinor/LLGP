@@ -28,6 +28,7 @@ public:
 	void StopHorizontalMovement();
 	void StopJumpingMovement();
 	void StopFalling();
+	virtual void Despawn();
 
 	// Accessor functions
 	bool GetIsSpawning();
@@ -35,37 +36,61 @@ public:
 	sf::Vector2f GetPosition();
 	sf::Vector2f GetVelocity() const;
 	bool GetCanCollide() const;
+	bool GetHasRider() const;
+	bool GetIsAlive() const;
+	bool GetPointsValue() const;
+	bool GetIsFacingRight() const;
 
 	// Modifier functions
 	void SetVelocity(const sf::Vector2f newVelocity);
 	void SetPosition(float xPos, float yPos);
 	void FlipSprite();
 	void ResetCollisionCooldown();
+	virtual void AddNewForce(sf::Vector2f forceToAdd);
 
 	// Update Functions
 	virtual void Update(float deltaTime);
 	void UpdateCollisionCooldown(float deltaTime);
+	virtual void UpdateForceDecrement();
+
+	// Render functuibs
+	void Render(sf::RenderTarget& target) override;
 
 protected:
 	// Vectors
 	sf::Vector2f m_feetPosition;
 	sf::Vector2f m_velocity;
 	sf::Vector2f m_spawnPosition;
+	sf::Vector2f m_dynamicForce;
 
 	//Bools
 	bool m_isJumping = false;
-	bool m_canJump = true;
-	bool m_canFall = false;
 	bool m_isFacingRight = true;
 	bool m_isMoving = false;
 	bool m_isGrounded = true;
 	bool m_isFalling = false;
 	bool m_isSpawning = false;
 	bool m_isFlying = false;
+	bool m_isAlive = true;
+	bool m_canJump = true;
+	bool m_canFall = false;
+	bool m_canCollide = false;
+	bool m_hasRider = true;
 
 	// Floats
 	float m_movementSpeed;
 	float m_jumpForce;
+
+	// Ints
+	int m_riderXOffset = 6;
+	int m_riderYOffset = 0;
+	int m_pointValue = POINTS_VALUE_BOUNDER;
+
+	// Strings
+	std::string debugName = "DefaultName"; // For debug
+
+	// Sprites
+	sf::Sprite m_riderSprite;
 
 	// Components
 	std::unique_ptr<LLGP::AnimationComponent> m_animationComponent;
@@ -93,12 +118,13 @@ protected:
 	void ReduceJumpForce();
 	virtual void UpdateMovementDirection();
 	void MoveToSpawnPosition();
+	virtual void SetRiderPosition();
 
 	// Physics functions
 	void AddGravity();
 
 	// Update functions
-	void UpdateWindowsBoundCollision();
+	virtual void UpdateWindowsBoundCollision();
 
 private:
 

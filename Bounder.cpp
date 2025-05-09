@@ -4,6 +4,8 @@ Bounder::Bounder(LLGP::AssetRegistry& assetRegistry, float xPos, float yPos, con
     : Enemy(assetRegistry, xPos, yPos, objectName)
 {
     FindTarget();
+
+    debugName = "Bounder";
 }
 
 void Bounder::DecideNextMove()

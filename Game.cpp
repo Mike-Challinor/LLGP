@@ -16,8 +16,9 @@ Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
     m_platforms.push_back(std::make_unique<Platform>(m_assetRegistry, 250.f, 400.f, "bottom_middle_platform"));
 
     // Create the players
-    m_players.push_back(std::make_unique<player>(inputManager, m_assetRegistry, 200.f, SCREEN_HEIGHT - 140.f, 1, "ostrich"));
-    m_players.push_back(std::make_unique<player>(inputManager, m_assetRegistry, 400.f, SCREEN_HEIGHT - 140.f, 2, "stork"));
+    /*m_players.push_back(std::make_unique<Player>(inputManager, m_assetRegistry, 200.f, SCREEN_HEIGHT - 140.f, 1, "ostrich"));
+    m_players.push_back(std::make_unique<Player>(inputManager, m_assetRegistry, 400.f, SCREEN_HEIGHT - 140.f, 2, "stork"));*/
+    
 
     // Get the spawner locations
     for (auto& platform : m_platforms)
@@ -28,8 +29,12 @@ Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
         }
     }
 
+    SpawnPlayer(PlayerType::Player1);
+    SpawnPlayer(PlayerType::Player2);
+
     // Create enemies
-    SpawnEnemy();
+    SpawnEnemy(EnemyType::Bounder);
+    SpawnEnemy(EnemyType::Hunter);
 
 }
 
@@ -54,55 +59,87 @@ sf::Vector2f Game::GetRandomSpawnLocation()
     return m_spawnPositions[randomIndex];
 }
 
-void Game::SpawnEnemy()
+void Game::SpawnEnemy(EnemyType type)
 {
     // Get new random spawner location
     sf::Vector2f spawnPos = GetRandomSpawnLocation();
 
-    // Create the enemy
-    m_enemies.push_back(std::make_unique<Hunter>(m_assetRegistry, spawnPos.x - 14.f, spawnPos.y, "enemy", m_players));
+    switch (type)
+    {
+    case EnemyType::Bounder:
+        SpawnCharacter<Bounder>(m_enemies, m_assetRegistry, spawnPos.x - 14.f, spawnPos.y, "enemy");
+        break;
 
-    // Get a reference to the enemy
-    Enemy& enemy = *m_enemies.back();
-
-    enemy.Spawn();    
-
-    m_enemies.push_back(std::make_unique<Bounder>(m_assetRegistry, spawnPos.x - 14.f, spawnPos.y, "enemy"));
-    Enemy& enemy2 = *m_enemies.back();
-    enemy.Spawn();
+    case EnemyType::Hunter:
+        SpawnCharacter<Hunter>(m_enemies, m_assetRegistry, spawnPos.x - 14.f, spawnPos.y, "enemy", m_players);
+        break;
+    }
 
 }
+
+void Game::SpawnPlayer(PlayerType type)
+{
+    switch (type)
+    {
+    case PlayerType::Player1:
+        SpawnCharacter<Player>(m_players, m_inputManager, m_assetRegistry, 200.f, SCREEN_HEIGHT - 65.f, 1, "ostrich");
+        break;
+
+    case PlayerType::Player2:
+        SpawnCharacter<Player>(m_players, m_inputManager, m_assetRegistry, 400.f, SCREEN_HEIGHT - 70.f, 2, "stork");
+        break;
+    }
+}
+
 
 
 void Game::Update(float deltaTime)
 {
-    std::vector<Character*> characters; // Create a vector for all current characters
+    // Remove all enemies that are not alive
+    m_enemies.erase(
+        std::remove_if(m_enemies.begin(), m_enemies.end(),
+            [](const std::unique_ptr<Enemy>& e) {
+                return !e->GetIsAlive();
+            }),
+        m_enemies.end());
 
+    // Create a vector for all current characters
+    std::vector<Character*> characters; 
+
+    // Loop through and add all players to the characters list
     for (auto& player : m_players)
         characters.push_back(player.get());
 
+    // Loop through and add all enemies to the characters list
     for (auto& enemy : m_enemies)
         characters.push_back(enemy.get());
 
+    // Loop through all characters
     for (auto* character : characters)
     {
-        character->Update(deltaTime);
-
-        if (!character->GetIsSpawning())
+        if (character->GetIsAlive())
         {
-            for (auto& platform : m_platforms)
+            // Update all characters
+            character->Update(deltaTime);
+
+            // Character-vs-platform collisions
+            if (!character->GetIsSpawning())
             {
-                CollisionManager::HandlePlatformCollision(*character, *platform);
+                for (auto& platform : m_platforms)
+                {
+                    CollisionManager::HandlePlatformCollision(*character, *platform);
+                }
             }
         }
+        
     }
 
-    // Character-vs-character collisions (optional now, easy to add):
+    // Character-vs-character collisions:
     for (size_t i = 0; i < characters.size(); ++i)
     {
         for (size_t j = i + 1; j < characters.size(); ++j)
         {
-            if (!characters[i]->GetIsSpawning() && !characters[j]->GetIsSpawning())
+            if (!characters[i]->GetIsSpawning() && !characters[j]->GetIsSpawning() && characters[i]->GetIsAlive() && characters[j]->GetIsAlive())
             {
                 CollisionManager::HandleCharacterCollision(*characters[i], *characters[j]);
             }

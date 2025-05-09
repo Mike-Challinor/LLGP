@@ -148,7 +148,7 @@
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Platform.cpp" />
-    <ClCompile Include="player.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Enemy.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -268,7 +268,7 @@
     <ClInclude Include="packages\SFML\include\SFML\Window\WindowEnums.hpp" />
     <ClInclude Include="packages\SFML\include\SFML\Window\WindowHandle.hpp" />
     <ClInclude Include="Platform.h" />
-    <ClInclude Include="player.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Enemy.h" />
   </ItemGroup>
   <ItemGroup>

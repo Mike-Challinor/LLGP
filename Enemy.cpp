@@ -3,6 +3,8 @@
 Enemy::Enemy(LLGP::AssetRegistry& assetRegistry, float xPos, float yPos, const std::string& objectName) :
 	Character(assetRegistry, xPos, yPos, objectName)
 {
+	m_riderXOffset = 9;
+	m_riderYOffset = -4;
 	m_objectName = m_objectName;
 	InitVariables();
 	InitAnimations();
@@ -37,6 +39,22 @@ void Enemy::InitAnimations()
 void Enemy::InitVariables()
 {
 	m_movementSpeed = ENEMY_MAX_WALKING_SPEED;
+}
+
+void Enemy::UpdateWindowsBoundCollision()
+{
+	// Top
+	if (this->CheckTopColl())
+	{
+		m_sprite.setPosition(sf::Vector2f(m_sprite.getGlobalBounds().position.x, 0.f));
+	}
+
+	// Bottom
+
+	else if (this->CheckFeetColl())
+	{
+		m_sprite.setPosition(sf::Vector2f(m_sprite.getGlobalBounds().position.x, SCREEN_HEIGHT - m_sprite.getGlobalBounds().size.y));
+	}
 }
 
 void Enemy::SetTarget(sf::Vector2f targetPosition)
@@ -82,26 +100,71 @@ void Enemy::MoveToTarget()
 	{
 		m_velocity = { 0.f, 0.f };
 		m_isMoving = false;
+		m_hasTarget = false;
 	}
 }
 
 void Enemy::FindTarget()
 {
-	// Simple target selection for now (just fly across screen)
-	if (m_sprite.getPosition().x < SCREEN_WIDTH / 2.f)
+	if (!m_hasTarget)
 	{
-		SetTarget({ SCREEN_WIDTH + 100.f, static_cast<float>(rand() % SCREEN_HEIGHT) });
+		// Simple target selection for now (just fly across screen)
+		if (m_isFacingRight)
+		{
+			SetTarget({ SCREEN_WIDTH + 100.f, static_cast<float>(rand() % SCREEN_HEIGHT) });
+		}
+		else
+		{
+			SetTarget({ -100.f, static_cast<float>(rand() % SCREEN_HEIGHT) });
+		}
+
+		m_hasTarget = true;
 	}
+	
+}
+
+void Enemy::SetRiderPosition()
+{
+
+	if (m_animationComponent->GetState() == LLGP::idle || m_animationComponent->GetState() == LLGP::walking)
+	{
+		m_riderYOffset = -9;
+	}
+
 	else
 	{
-		SetTarget({ -100.f, static_cast<float>(rand() % SCREEN_HEIGHT) });
+		m_riderYOffset = -4;
 	}
+
+	// Get the sprite’s actual visual origin (in world space)
+	sf::Vector2f charPos = m_sprite.getPosition();
+	sf::Vector2f scale = m_sprite.getScale();
+
+	// Calculate xOffset based on facing direction
+	int xOffset = m_riderXOffset;
+
+	if (!m_isFacingRight)
+	{
+		xOffset = m_riderXOffset / 2;
+	}
+
+	// Flip-aware offset (only flip horizontally)
+	sf::Vector2f offset(xOffset, m_riderYOffset);
+
+	offset.x *= scale.x; // Flip horizontally if scale.x == -1
+
+	// Position rider relative to the character's true visual anchor
+	sf::Vector2f anchoredPos = charPos + offset;
+
+	m_riderSprite.setPosition(anchoredPos);
 }
+
 
 void Enemy::Update(float deltaTime)
 {
 	DecideNextMove();
 	MoveToTarget();
+
 	Character::Update(deltaTime);
 }
 
@@ -113,4 +176,10 @@ void Enemy::DecideNextMove()
 void Enemy::ResetTarget()
 {
 	m_hasCollided = true;
+	m_hasTarget = false;
+}
+
+void Enemy::RemoveRider()
+{
+	m_hasRider = false;
 }
