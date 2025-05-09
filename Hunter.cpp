@@ -4,9 +4,12 @@ Hunter::Hunter(LLGP::AssetRegistry& assetRegistry,
     float xPos,
     float yPos,
     const std::string& objectName,
-    const std::vector<std::unique_ptr<player>>& players)
+    const std::vector<std::unique_ptr<Player>>& players)
     : Enemy(assetRegistry, xPos, yPos, objectName)
 {
+    debugName = "Hunter";
+    m_pointValue = POINTS_VALUE_HUNTER;
+
     // Get refs to the players
     for (const auto& p : players)
     {

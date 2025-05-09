@@ -1,8 +1,12 @@
 #include "Character.h"
 
 Character::Character(LLGP::AssetRegistry& assetRegistry, float xPos, float yPos, const std::string& objectName) : 
-	GameObject(assetRegistry, xPos, yPos, objectName)
+	GameObject(assetRegistry, xPos, yPos, objectName), m_riderSprite(m_texture)
 {
+	// Set the rider sprite
+	m_riderSprite.setTextureRect(m_assetRegistry.LoadSprite("rider"));
+	SetRiderPosition();
+
 	UpdateFeetPosition();
 	InitVariables();
 	
@@ -29,23 +33,30 @@ void Character::UpdateFeetPosition()
 
 void Character::FlipSprite()
 {
+	sf::FloatRect bounds = m_sprite.getLocalBounds();
+
 	// Flip sprite left
 	if (m_isFacingRight)
 	{
-		// Set the origin to the sprite's center (or appropriate pivot point)
-		m_sprite.setOrigin(sf::Vector2f(m_sprite.getLocalBounds().size.x, 0.f));
+		// Set the origin to the sprite's center
+		m_sprite.setOrigin(sf::Vector2f(bounds.size.x, 0.f));
+		m_riderSprite.setOrigin(sf::Vector2f(m_riderSprite.getLocalBounds().size.x, 0.f));
+
 		// Set the scale to flip
 		m_sprite.setScale(sf::Vector2f(-1.f, 1.f));
+		m_riderSprite.setScale(sf::Vector2f(-1.f, 1.f));
 	}
 
 	// Flip sprite right
 	else
 	{
-		// Set the origin to the sprite's center (or appropriate pivot point)
+		// Set the origin to the sprite's center
 		m_sprite.setOrigin(sf::Vector2f(0.f, 0.f));
+		m_riderSprite.setOrigin(sf::Vector2f(0.f, 0.f));
 
 		// Set the scale to flip
 		m_sprite.setScale(sf::Vector2f(1.f, 1.f));
+		m_riderSprite.setScale(sf::Vector2f(1.f, 1.f));
 	}
 
 	m_isFacingRight = !m_isFacingRight;
@@ -99,6 +110,7 @@ void Character::StopSpawning()
 	m_isSpawning = false;
 	m_canFall = true;
 	m_canJump = true;
+	m_canCollide = true;
 
 	// Set the colour back to white
 	m_sprite.setColor(sf::Color::White);
@@ -160,7 +172,7 @@ void Character::Move()
 	if (!m_isSpawning)
 	{
 		// Apply movement to the characters sprite
-		m_sprite.setPosition(m_sprite.getPosition() + m_velocity);
+		m_sprite.setPosition(m_sprite.getPosition() + m_velocity + m_dynamicForce);
 	}
 }
 
@@ -206,8 +218,9 @@ void Character::UpdateMovementDirection()
 
 void Character::MoveToSpawnPosition()
 {
-	m_sprite.setPosition(sf::Vector2f(m_sprite.getGlobalBounds().position.x, m_sprite.getPosition().y - 0.1f));
+	debugName;
 
+	m_sprite.setPosition(sf::Vector2f(m_sprite.getGlobalBounds().position.x, m_sprite.getPosition().y - 0.1f));
 	float yPos = m_sprite.getGlobalBounds().position.y + m_sprite.getGlobalBounds().size.y - 25.f;
 
 	if (yPos < m_spawnPosition.y)
@@ -215,6 +228,32 @@ void Character::MoveToSpawnPosition()
 		StopSpawning();
 	}
 }
+
+void Character::SetRiderPosition()
+{
+	// Get the sprite’s actual visual origin (in world space)
+	sf::Vector2f charPos = m_sprite.getPosition();
+	sf::Vector2f origin = m_sprite.getOrigin();
+	sf::Vector2f scale = m_sprite.getScale();
+
+	int xOffset = m_riderXOffset;
+
+	if (!m_isFacingRight)
+	{
+		xOffset = m_riderXOffset / 2;
+	}
+
+	// Flip-aware offset (only flip horizontally)
+	sf::Vector2f offset(xOffset, m_riderYOffset);
+
+	offset.x *= scale.x; // Flip horizontally if scale.x == -1
+
+	// Position rider relative to the character's true visual anchor
+	sf::Vector2f anchoredPos = charPos + offset;
+
+	m_riderSprite.setPosition(anchoredPos);
+}
+
 
 void Character::AddGravity()
 {
@@ -277,12 +316,14 @@ void Character::Spawn()
 	m_isSpawning = true;
 	m_canFall = false;
 	m_canJump = false;
+	m_canCollide = false;
 
 	m_sprite.setColor(sf::Color::Cyan);
 
 	float xPos = m_sprite.getPosition().x;
 	float yPos = m_sprite.getPosition().y - m_sprite.getGlobalBounds().size.x;
 	m_spawnPosition = sf::Vector2f(xPos, yPos);
+
 }
 
 void Character::SetPosition(float xPos, float yPos)
@@ -311,6 +352,11 @@ void Character::StopFalling()
 	m_isJumping = false;
 	m_canJump = true;
 	m_isFalling = false;
+}
+
+void Character::Despawn()
+{
+	m_isAlive = false;
 }
 
 bool Character::GetIsSpawning()
@@ -344,9 +390,68 @@ void Character::UpdateCollisionCooldown(float deltaTime)
 		m_collisionCooldown -= deltaTime;
 }
 
+void Character::UpdateForceDecrement()
+{
+	if (m_dynamicForce != sf::Vector2f(0.f, 0.f))
+	{
+		// Decrement the x force value
+		if (m_dynamicForce.x > 0)
+			m_dynamicForce.x -= COLLISION_FORCE_DECREMENT;
+
+		else if (m_dynamicForce.x < 0)
+			m_dynamicForce.x += COLLISION_FORCE_DECREMENT;
+
+		// Decrement the y force value
+		if (m_dynamicForce.y > 0)
+			m_dynamicForce.y -= COLLISION_FORCE_DECREMENT;
+
+		else if (m_dynamicForce.y < 0)
+			m_dynamicForce.y += COLLISION_FORCE_DECREMENT;
+
+		// Clamp very small values to zero to prevent lingering drift
+		if (std::abs(m_dynamicForce.x) < COLLISION_FORCE_DECREMENT)
+			m_dynamicForce.x = 0.f;
+		if (std::abs(m_dynamicForce.y) < COLLISION_FORCE_DECREMENT)
+			m_dynamicForce.y = 0.f;
+	}
+}
+
+void Character::Render(sf::RenderTarget& target)
+{
+	// Draw the rider
+	if (m_hasRider)
+		target.draw(m_riderSprite);
+
+	GameObject::Render(target);
+}
+
 bool Character::GetCanCollide() const
 {
-	return m_collisionCooldown <= 0.f;
+	if (m_canCollide && m_collisionCooldown <= 0.f)
+		return true;
+
+	else
+		return false;
+}
+
+bool Character::GetHasRider() const
+{
+	return m_hasRider;
+}
+
+bool Character::GetIsAlive() const
+{
+	return m_isAlive;
+}
+
+bool Character::GetPointsValue() const
+{
+	return m_pointValue;
+}
+
+bool Character::GetIsFacingRight() const
+{
+	return m_isFacingRight;
 }
 
 void Character::ResetCollisionCooldown()
@@ -354,9 +459,19 @@ void Character::ResetCollisionCooldown()
 	m_collisionCooldown = m_maxCollisionCooldown;
 }
 
+void Character::AddNewForce(sf::Vector2f forceToAdd)
+{
+	m_dynamicForce += forceToAdd;
+
+	// Clamp X and Y forces
+	m_dynamicForce.x = std::clamp(m_dynamicForce.x, -COLLISION_MAX_FORCE, COLLISION_MAX_FORCE);
+	m_dynamicForce.y = std::clamp(m_dynamicForce.y, -COLLISION_MAX_FORCE, COLLISION_MAX_FORCE);
+}
+
 void Character::Update(float deltaTime)
 {
-	
+	debugName;
+
 	if (m_isSpawning) // If the player is spawning
 	{
 		MoveToSpawnPosition();
@@ -379,6 +494,12 @@ void Character::Update(float deltaTime)
 
 	// Apply movement
 	Move();
+
+	// Reduce forces
+	UpdateForceDecrement();
+
+	// Update rider sprites position
+	SetRiderPosition();
 
 	// Update the players feet position
 	UpdateFeetPosition();

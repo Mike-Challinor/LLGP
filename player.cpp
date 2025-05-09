@@ -1,13 +1,15 @@
-     #include "player.h"
+     #include "Player.h"
 
 // Constructor
-player::player(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry, float xPos, float yPos, int player_id, const std::string& objectName)
+Player::Player(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry, float xPos, float yPos, int player_id, const std::string& objectName)
 	: Character(assetRegistry, xPos, yPos, objectName),  // Initialize Character base class
 	m_inputManager(inputManager)
 {
-	// Set the players id
+	// Set the players variables
 	m_playerID = player_id;
 	m_canFall = true;
+	m_canCollide = true;
+	m_pointValue = POINTS_VALUE_PLAYER;
 
 	SetUsableKeys(inputManager);
 
@@ -15,7 +17,7 @@ player::player(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegis
 }
 
 // Destructor
-player::~player()
+Player::~Player()
 {
 	// Set the key listeners
 	for (const auto& key : m_usableKeys)
@@ -28,7 +30,7 @@ player::~player()
 	}
 }
 
-void player::InitAnimations()
+void Player::InitAnimations()
 {
 	m_animations[LLGP::AnimationState::idle] = Animation{ 1, 0 };
 	m_animations[LLGP::AnimationState::walking] = Animation{ 4, 0 };
@@ -48,7 +50,7 @@ void player::InitAnimations()
 	}
 }
 
-void player::SetUsableKeys(LLGP::InputManager& inputManager)
+void Player::SetUsableKeys(LLGP::InputManager& inputManager)
 {
 	switch (m_playerID)
 	{
@@ -80,7 +82,15 @@ void player::SetUsableKeys(LLGP::InputManager& inputManager)
 	}
 }
 
-void player::UpdateMovementDirection()
+void Player::UpdateForceDecrement()
+{
+	Character::UpdateForceDecrement();
+
+	if (m_dynamicForce.x <= INITIAL_COLLISION_FORCE / 2);
+		m_canInput = true;
+}
+
+void Player::UpdateMovementDirection()
 {
 	if (m_activeKeys.count(LLGP::Key::A) || m_activeKeys.count(LLGP::Key::Left))
 	{
@@ -110,7 +120,7 @@ void player::UpdateMovementDirection()
 	}
 }
 
-void player::keyInputListener(LLGP::Key key)
+void Player::keyInputListener(LLGP::Key key)
 {
 	m_activeKeys.insert(key);
 
@@ -133,7 +143,7 @@ void player::keyInputListener(LLGP::Key key)
 }
 
 
-void player::OnKeyReleased(LLGP::Key key)
+void Player::OnKeyReleased(LLGP::Key key)
 {
 	m_activeKeys.erase(key);
 
@@ -158,24 +168,46 @@ void player::OnKeyReleased(LLGP::Key key)
 	}
 }
 
-// Update functions
-void player::UpdateInput()
+void Player::Despawn()
 {
-	// Keyboard input
-	m_inputManager.Update();
-
-	UpdateMovementDirection();
-	
+	m_lives--;
+	Character::Despawn();
 }
 
-void player::Update(float deltaTime)
+void Player::AddScore(int pointsToAdd)
+{
+	m_score += pointsToAdd;
+}
+
+void Player::AddNewForce(sf::Vector2f forceToAdd)
+{
+	Character::AddNewForce(forceToAdd);
+	m_canInput = false;
+}
+
+// Update functions
+void Player::UpdateInput()
+{
+	if (m_canInput)
+	{
+		// Keyboard input
+		m_inputManager.Update();
+		UpdateMovementDirection();
+
+	}
+}
+
+void Player::Update(float deltaTime)
 {
 	Character::Update(deltaTime);
 }
 
-// Render functions
-void player::Render(sf::RenderTarget& target)
+void Player::Render(sf::RenderTarget& target)
 {
-	GameObject::Render(target);
+	if (m_isAlive)
+	{
+		target.draw(m_riderSprite);
+		GameObject::Render(target);
+	}
 }
 

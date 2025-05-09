@@ -16,6 +16,9 @@ public:
 	virtual void DecideNextMove();
 	void ResetTarget();
 
+	// Modifier functions
+	void RemoveRider();
+
 private:
 	// Vectors
 	sf::Vector2f m_targetPosition;
@@ -24,6 +27,9 @@ private:
 	void InitAnimations() override;
 	void InitVariables() override;
 
+	// Update functions
+	void UpdateWindowsBoundCollision() override;
+
 
 protected:
 	// Floats
@@ -31,6 +37,7 @@ protected:
 
 	// Bools
 	bool m_hasCollided = false;
+	bool m_hasTarget = false;
 
 	// Mutator Functions
 	void SetTarget(sf::Vector2f targetPosition);
@@ -38,6 +45,8 @@ protected:
 
 	// Functions
 	virtual void FindTarget();
+	void SetRiderPosition() override;
+
 
 };
 

@@ -31,6 +31,11 @@ LLGP::AnimationState LLGP::AnimationComponent::GetState()
 	return m_currentState;
 }
 
+int LLGP::AnimationComponent::GetCurrentFrame()
+{
+	return m_currentFrame;
+}
+
 void LLGP::AnimationComponent::SetNextSprite()
 {
 	m_sprite.setTextureRect(GetSpriteRectByName(m_name + std::to_string(m_currentFrame)));

@@ -57,17 +57,20 @@ void LLGP::AssetRegistry::StoreTextureMaps()
 	// Load the stork textures
 	PopulateTextureMap(m_storkTextures, 7, "stork", 28, 40, 2, 76, 4);
 
-	// Load the platform textures
-	AddSpriteToMap(m_bottom_platformTextures, "bottom_platform", 0, 704, 372, 60); // Bottom platform
-	AddSpriteToMap(m_top_left_platformTextures, "top_left_platform", 0, 640, 65, 14); // Top left platform
-	AddSpriteToMap(m_bottom_left_platformTextures, "bottom_left_platform", 384, 640, 126, 16); // Bottom left platform
-	AddSpriteToMap(m_bottom_middle_platformTextures, "bottom_middle_platform", 736, 640, 128, 16); // Bottom left platform
+	// Load the rider textures
+	PopulateTextureMap(m_riderTextures, 2, "rider", 24, 14, 6, 214, 8);
 
 	// Load the vulture textures
 	PopulateTextureMap(m_enemyTextures, 4, "enemy", 30, 28, 2, 149, 1);
 	AddSpriteToMap(m_enemyTextures, "enemy", 128, 150, 28, 26); // Sliding sprite
 	AddSpriteToMap(m_enemyTextures, "enemy", 160, 152, 32, 16); // Flying sprite 1
 	AddSpriteToMap(m_enemyTextures, "enemy", 192, 144, 33, 26); // Flying sprite 2
+
+	// Load the platform textures
+	AddSpriteToMap(m_bottom_platformTextures, "bottom_platform", 0, 704, 372, 60); // Bottom platform
+	AddSpriteToMap(m_top_left_platformTextures, "top_left_platform", 0, 640, 65, 14); // Top left platform
+	AddSpriteToMap(m_bottom_left_platformTextures, "bottom_left_platform", 384, 640, 126, 16); // Bottom left platform
+	AddSpriteToMap(m_bottom_middle_platformTextures, "bottom_middle_platform", 736, 640, 128, 16); // Bottom left platform
 
 }
 
@@ -136,3 +139,32 @@ const std::unordered_map<std::string, sf::IntRect>& LLGP::AssetRegistry::LoadSpr
 	}
 
 }
+
+const sf::IntRect& LLGP::AssetRegistry::LoadSprite(const std::string& name)
+{
+	if (name == "rider")
+	{
+		// Collect all rider frames
+		std::vector<const sf::IntRect*> riderRects;
+		for (const auto& [key, rect] : m_riderTextures)
+		{
+			if (key.find("rider") == 0)
+				riderRects.push_back(&rect);
+		}
+
+		if (riderRects.empty())
+		{
+			throw std::runtime_error("No rider textures found");
+		}
+
+		// Pick a random one
+		static std::random_device rd;
+		static std::mt19937 gen(rd());
+		std::uniform_int_distribution<size_t> dist(0, riderRects.size() - 1);
+
+		return *riderRects[dist(gen)];
+	}
+
+	throw std::runtime_error("Unhandled sprite name: " + name);
+}
+
