@@ -38,10 +38,18 @@ private:
 	std::vector<std::unique_ptr<Platform>> m_platforms;
 	std::vector<std::unique_ptr<Enemy>> m_enemies;
 	std::vector<sf::Vector2f> m_spawnPositions;
+	std::vector<sf::Text> m_allText;
 
+	// Functions
 	sf::Vector2f GetRandomSpawnLocation();
 	void SpawnEnemy(EnemyType type);
 	void SpawnPlayer(PlayerType type);
+	void SetText();
+
+	// Text
+	sf::Font m_font;
+	sf::Text m_player1ScoreText;
+	sf::Text m_player2ScoreText;
 
 public:
 	Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry);

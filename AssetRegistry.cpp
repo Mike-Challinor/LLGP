@@ -31,11 +31,10 @@ void LLGP::AssetRegistry::PopulateTextureMap(std::unordered_map<std::string, sf:
 
 void LLGP::AssetRegistry::InitFonts()
 {
-	/*
-	if (!m_joustFont.openFromFile("Resources/Fonts/JoustFont.otf"))
+	if (!m_joustFont.openFromFile("Resources/Fonts/joust.otf"))
 	{
-		throw std::runtime_error("ERROR::ASSETREGISTRY::INITFONTS:: Failed to load JoustFontotf");
-	}*/
+		throw std::runtime_error("ERROR::ASSETREGISTRY::INITFONTS:: Failed to load joust.otf");
+	}
 	
 }
 

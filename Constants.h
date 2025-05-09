@@ -14,6 +14,6 @@ const float INITIAL_JUMP_FORCE = 1.3f;
 const float INITIAL_COLLISION_FORCE = 1.15f;
 const float COLLISION_MAX_FORCE = 1.5f;
 
-const int POINTS_VALUE_BOUNDER = 500.f;
-const int POINTS_VALUE_HUNTER = 750.f;
-const int POINTS_VALUE_PLAYER = 1000.f;
+const int POINTS_VALUE_BOUNDER = 500;
+const int POINTS_VALUE_HUNTER = 750;
+const int POINTS_VALUE_PLAYER = 1000;

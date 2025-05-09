@@ -444,7 +444,7 @@ bool Character::GetIsAlive() const
 	return m_isAlive;
 }
 
-bool Character::GetPointsValue() const
+int Character::GetPointsValue() const
 {
 	return m_pointValue;
 }
