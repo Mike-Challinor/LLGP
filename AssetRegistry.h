@@ -22,6 +22,10 @@ namespace LLGP
 		std::unordered_map<std::string, sf::IntRect> m_top_left_platformTextures;
 		std::unordered_map<std::string, sf::IntRect> m_bottom_left_platformTextures;
 		std::unordered_map<std::string, sf::IntRect> m_bottom_middle_platformTextures;
+		std::unordered_map<std::string, sf::IntRect> m_top_middle_platformTextures;
+		std::unordered_map<std::string, sf::IntRect> m_middle_right_platformTextures;
+		std::unordered_map<std::string, sf::IntRect> m_bottom_right_platformTextures;
+		std::unordered_map<std::string, sf::IntRect> m_top_right_platformTextures;
 
 		void PopulateTextureMap(std::unordered_map<std::string, sf::IntRect>& texture_map,
 			int amount,

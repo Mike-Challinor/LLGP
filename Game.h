@@ -39,6 +39,8 @@ private:
 	std::vector<std::unique_ptr<Enemy>> m_enemies;
 	std::vector<sf::Vector2f> m_spawnPositions;
 	std::vector<sf::Text> m_allText;
+	std::vector<sf::Sprite> m_player1LivesSprites;
+	std::vector<sf::Sprite> m_player2LivesSprites;
 
 	// Functions
 	sf::Vector2f GetRandomSpawnLocation();
@@ -50,6 +52,11 @@ private:
 	sf::Font m_font;
 	sf::Text m_player1ScoreText;
 	sf::Text m_player2ScoreText;
+
+	// Shapes
+	sf::RectangleShape m_lava;
+	sf::Sprite m_player1LivesSprite;
+	sf::Sprite m_player2LivesSprite;
 
 public:
 	Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry);
