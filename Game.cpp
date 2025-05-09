@@ -4,7 +4,7 @@
 
 
 Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
-	: m_inputManager(inputManager), m_assetRegistry(assetRegistry)
+	: m_inputManager(inputManager), m_assetRegistry(assetRegistry), m_player1ScoreText(m_font), m_player2ScoreText(m_font)
 {
 	// Load the sprite sheet
     m_assetRegistry.LoadSpriteSheet();
@@ -14,12 +14,7 @@ Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
 	m_platforms.push_back(std::make_unique<Platform>(m_assetRegistry, 150.f, SCREEN_HEIGHT - 70.f, "bottom_platform"));
     m_platforms.push_back(std::make_unique<Platform>(m_assetRegistry, 0.f, 350.f, "bottom_left_platform"));
     m_platforms.push_back(std::make_unique<Platform>(m_assetRegistry, 250.f, 400.f, "bottom_middle_platform"));
-
-    // Create the players
-    /*m_players.push_back(std::make_unique<Player>(inputManager, m_assetRegistry, 200.f, SCREEN_HEIGHT - 140.f, 1, "ostrich"));
-    m_players.push_back(std::make_unique<Player>(inputManager, m_assetRegistry, 400.f, SCREEN_HEIGHT - 140.f, 2, "stork"));*/
-    
-
+     
     // Get the spawner locations
     for (auto& platform : m_platforms)
     {
@@ -29,12 +24,28 @@ Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
         }
     }
 
+    // Spawn players
     SpawnPlayer(PlayerType::Player1);
     SpawnPlayer(PlayerType::Player2);
 
     // Create enemies
     SpawnEnemy(EnemyType::Bounder);
     SpawnEnemy(EnemyType::Hunter);
+
+    // --- Setup text --- //
+    m_font = m_assetRegistry.GetFont(); // Get the font
+
+    // Add text to vector
+    m_allText.push_back(m_player1ScoreText);
+    m_allText.push_back(m_player2ScoreText);
+
+    // Set the string and position for each text
+    m_player1ScoreText.setString("Player 1: 0");
+    m_player1ScoreText.setPosition(sf::Vector2f(10.f, 10.f));
+    m_player1ScoreText.setCharacterSize(18);
+    m_player2ScoreText.setString("Player 2: 0");
+    m_player2ScoreText.setCharacterSize(18);
+    m_player2ScoreText.setPosition(sf::Vector2f(SCREEN_WIDTH - m_player2ScoreText.getGlobalBounds().size.x - 10.f, 10.f));
 
 }
 
@@ -91,7 +102,10 @@ void Game::SpawnPlayer(PlayerType type)
     }
 }
 
+void Game::SetText()
+{
 
+}
 
 void Game::Update(float deltaTime)
 {
@@ -108,7 +122,26 @@ void Game::Update(float deltaTime)
 
     // Loop through and add all players to the characters list
     for (auto& player : m_players)
+    {
         characters.push_back(player.get());
+
+        if (player->GetPlayerID() == 1)
+        {
+            sf::String score = std::to_string(player->GetScore());
+            m_player1ScoreText.setString("Player 1: " + score);
+            m_player1ScoreText.setPosition(sf::Vector2f(10.f, 10.f));
+        }
+
+        else if (player->GetPlayerID() == 2)
+        {
+            sf::String score = std::to_string(player->GetScore());
+            m_player2ScoreText.setString("Player 2: " + score);
+            m_player2ScoreText.setPosition(sf::Vector2f(SCREEN_WIDTH - m_player2ScoreText.getGlobalBounds().size.x - 10.f, 10.f));
+        }
+            
+    }
+        
+        
 
     // Loop through and add all enemies to the characters list
     for (auto& enemy : m_enemies)
@@ -172,4 +205,7 @@ void Game::Render(sf::RenderTarget& target)
 	{
 		platform->Render(target);
 	}
+
+    target.draw(m_player1ScoreText);
+    target.draw(m_player2ScoreText);
 }

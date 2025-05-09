@@ -168,6 +168,16 @@ void Player::OnKeyReleased(LLGP::Key key)
 	}
 }
 
+int Player::GetScore() const
+{
+	return m_score;
+}
+
+int Player::GetPlayerID() const
+{
+	return m_playerID;
+}
+
 void Player::Despawn()
 {
 	m_lives--;

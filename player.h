@@ -45,6 +45,10 @@ public:
 	void keyInputListener(LLGP::Key key);
 	void OnKeyReleased(LLGP::Key key);
 
+	// Accessor functions
+	int GetScore() const;
+	int GetPlayerID() const;
+
 	// Mutator functions
 	void Despawn() override;
 	void AddScore(int pointsToAdd);

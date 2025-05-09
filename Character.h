@@ -38,7 +38,7 @@ public:
 	bool GetCanCollide() const;
 	bool GetHasRider() const;
 	bool GetIsAlive() const;
-	bool GetPointsValue() const;
+	int GetPointsValue() const;
 	bool GetIsFacingRight() const;
 
 	// Modifier functions
