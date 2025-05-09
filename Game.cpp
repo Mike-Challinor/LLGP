@@ -4,7 +4,8 @@
 
 
 Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
-	: m_inputManager(inputManager), m_assetRegistry(assetRegistry), m_player1ScoreText(m_font), m_player2ScoreText(m_font)
+	: m_inputManager(inputManager), m_assetRegistry(assetRegistry), m_player1ScoreText(m_font), 
+    m_player2ScoreText(m_font), m_player1LivesSprite(m_player1LivesSprite), m_player2LivesSprite(m_player2LivesSprite)
 {
 	// Load the sprite sheet
     m_assetRegistry.LoadSpriteSheet();
@@ -14,6 +15,24 @@ Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
 	m_platforms.push_back(std::make_unique<Platform>(m_assetRegistry, 150.f, SCREEN_HEIGHT - 70.f, "bottom_platform"));
     m_platforms.push_back(std::make_unique<Platform>(m_assetRegistry, 0.f, 350.f, "bottom_left_platform"));
     m_platforms.push_back(std::make_unique<Platform>(m_assetRegistry, 250.f, 400.f, "bottom_middle_platform"));
+    m_platforms.push_back(std::make_unique<Platform>(m_assetRegistry, 200.f, 250.f, "top_middle_platform"));
+    m_platforms.push_back(std::make_unique<Platform>(m_assetRegistry, SCREEN_WIDTH - 300.f, 325.f, "middle_right_platform"));
+    m_platforms.push_back(std::make_unique<Platform>(m_assetRegistry, SCREEN_WIDTH - 84.f, 200.f, "top_right_platform"));
+    m_platforms.push_back(std::make_unique<Platform>(m_assetRegistry, SCREEN_WIDTH - 85.f, 375.f, "bottom_right_platform"));
+
+    // Create the lava
+    m_lava.setFillColor(sf::Color(255, 32, 0, 255));
+    m_lava.setSize(sf::Vector2f(SCREEN_WIDTH, 50.f));
+    m_lava.setPosition(sf::Vector2f(0.f, SCREEN_HEIGHT - m_lava.getGlobalBounds().size.y));
+
+    //  --- Create the sprites for lives --- //
+    m_player1LivesSprite.setTexture(assetRegistry.LoadTexture());
+    m_player1LivesSprite.setTextureRect(assetRegistry.LoadSprite("rider"));
+    m_player1LivesSprite.setPosition(sf::Vector2f(160.f, 160.f));
+
+    m_player2LivesSprite.setTexture(assetRegistry.LoadTexture());
+    m_player2LivesSprite.setTextureRect(assetRegistry.LoadSprite("rider"));
+    m_player2LivesSprite.setPosition(sf::Vector2f(160.f, 160.f));
      
     // Get the spawner locations
     for (auto& platform : m_platforms)
@@ -41,10 +60,12 @@ Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
 
     // Set the string and position for each text
     m_player1ScoreText.setString("Player 1: 0");
-    m_player1ScoreText.setPosition(sf::Vector2f(10.f, 10.f));
     m_player1ScoreText.setCharacterSize(18);
+    m_player1ScoreText.setPosition(sf::Vector2f(10.f, 10.f));
+    m_player1ScoreText.setFillColor(sf::Color::Yellow);
     m_player2ScoreText.setString("Player 2: 0");
     m_player2ScoreText.setCharacterSize(18);
+    m_player2ScoreText.setFillColor(sf::Color::Yellow);
     m_player2ScoreText.setPosition(sf::Vector2f(SCREEN_WIDTH - m_player2ScoreText.getGlobalBounds().size.x - 10.f, 10.f));
 
 }
@@ -201,6 +222,8 @@ void Game::Render(sf::RenderTarget& target)
         enemy->Render(target);
     }
 
+    target.draw(m_lava);
+
 	for (auto& platform : m_platforms)
 	{
 		platform->Render(target);
@@ -208,4 +231,7 @@ void Game::Render(sf::RenderTarget& target)
 
     target.draw(m_player1ScoreText);
     target.draw(m_player2ScoreText);
+
+    target.draw(m_player1LivesSprite);
+    target.draw(m_player2LivesSprite);
 }

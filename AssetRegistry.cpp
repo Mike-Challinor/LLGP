@@ -69,7 +69,11 @@ void LLGP::AssetRegistry::StoreTextureMaps()
 	AddSpriteToMap(m_bottom_platformTextures, "bottom_platform", 0, 704, 372, 60); // Bottom platform
 	AddSpriteToMap(m_top_left_platformTextures, "top_left_platform", 0, 640, 65, 14); // Top left platform
 	AddSpriteToMap(m_bottom_left_platformTextures, "bottom_left_platform", 384, 640, 126, 16); // Bottom left platform
-	AddSpriteToMap(m_bottom_middle_platformTextures, "bottom_middle_platform", 736, 640, 128, 16); // Bottom left platform
+	AddSpriteToMap(m_bottom_middle_platformTextures, "bottom_middle_platform", 736, 640, 128, 16); // Bottom middle platform
+	AddSpriteToMap(m_top_middle_platformTextures, "top_middle_platform", 192, 640, 176, 18); // Top middle platform
+	AddSpriteToMap(m_middle_right_platformTextures, "middle_right_platform", 512, 640, 116, 22); // Middle right platform
+	AddSpriteToMap(m_top_right_platformTextures, "top_right_platform", 96, 640, 94, 14); // Top right platform
+	AddSpriteToMap(m_bottom_right_platformTextures, "bottom_right_platform", 640, 640, 92, 15); // Bottom right platform
 
 }
 
@@ -127,6 +131,22 @@ const std::unordered_map<std::string, sf::IntRect>& LLGP::AssetRegistry::LoadSpr
 	else if (name == "bottom_middle_platform")
 	{
 		return m_bottom_middle_platformTextures;
+	}
+	else if (name == "top_middle_platform")
+	{
+		return m_top_middle_platformTextures;
+	}
+	else if (name == "middle_right_platform")
+	{
+		return m_middle_right_platformTextures;
+	}
+	else if (name == "top_right_platform")
+	{
+		return m_top_right_platformTextures;
+	}
+	else if (name == "bottom_right_platform")
+	{
+		return m_bottom_right_platformTextures;
 	}
 	else if (name == "enemy" || name == "bounder" || name == "hunter" || name == "shadowlord")
 	{

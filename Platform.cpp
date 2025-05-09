@@ -43,6 +43,24 @@ void Platform::SetHasSpawner(const std::string& objectName)
 		
 	}
 
+	else if (objectName == "top_middle_platform")
+	{
+		// Set the has spawner bool to true
+		m_hasSpawner = true;
+
+		// Set the local x position of the spawner
+		localxPos = 69.f;
+	}
+
+	else if (objectName == "middle_right_platform")
+	{
+		// Set the has spawner bool to true
+		m_hasSpawner = true;
+
+		// Set the local x position of the spawner
+		localxPos = 72.f;
+	}
+
 	else
 	{
 		// Set the spawner bool to false
