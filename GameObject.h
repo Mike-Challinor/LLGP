@@ -43,5 +43,8 @@ protected:
 	// Mutation methods
 	void SetCollisionComponent(std::unique_ptr<CollisionComponent> component);
 
+	// Functions
+	virtual void SetTexture();
+
 };
 

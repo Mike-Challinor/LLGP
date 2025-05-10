@@ -146,6 +146,7 @@
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Hunter.cpp" />
     <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="LivesIcon.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Platform.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="Hunter.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Key.h" />
+    <ClInclude Include="LivesIcon.h" />
     <ClInclude Include="packages\SFML\include\SFML\Audio.hpp" />
     <ClInclude Include="packages\SFML\include\SFML\Audio\AudioResource.hpp" />
     <ClInclude Include="packages\SFML\include\SFML\Audio\Export.hpp" />

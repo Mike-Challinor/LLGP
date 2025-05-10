@@ -20,6 +20,9 @@ private:
 	int m_lives = 5;
 	int m_score = 0;
 
+	// Colours
+	sf::Color m_playerColour;
+
 	// Lists
 	std::set<LLGP::Key> m_activeKeys;
 
@@ -47,6 +50,7 @@ public:
 
 	// Accessor functions
 	int GetScore() const;
+	int GetLives() const;
 	int GetPlayerID() const;
 
 	// Mutator functions

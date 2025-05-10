@@ -13,10 +13,8 @@ GameObject::GameObject(LLGP::AssetRegistry& assetRegistry, float xPos, float yPo
 	// Set the objects name
 	m_objectName = objectName;
 
-	// Load the texture map
-	m_texture = assetRegistry.LoadTexture();	
-	m_sprite.setTexture(m_texture);
-	m_textureMap = assetRegistry.LoadSprites(m_objectName);
+	// Set the texture
+	SetTexture();
 }
 
 GameObject::~GameObject()
@@ -31,6 +29,13 @@ CollisionComponent* GameObject::GetCollisionComponent() const
 void GameObject::SetCollisionComponent(std::unique_ptr<CollisionComponent> component)
 {
 	m_collisionComponent = std::move(component);
+}
+
+void GameObject::SetTexture()
+{
+	m_texture = m_assetRegistry.LoadTexture();
+	m_sprite.setTexture(m_texture);
+	m_textureMap = m_assetRegistry.LoadSprites(m_objectName);
 }
 
 sf::FloatRect GameObject::GetCollisionBounds()

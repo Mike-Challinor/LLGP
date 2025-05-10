@@ -84,6 +84,7 @@ protected:
 	// Ints
 	int m_riderXOffset = 6;
 	int m_riderYOffset = 0;
+	int m_riderIndex = 0;
 	int m_pointValue = POINTS_VALUE_BOUNDER;
 
 	// Strings

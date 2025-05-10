@@ -5,7 +5,11 @@ Enemy::Enemy(LLGP::AssetRegistry& assetRegistry, float xPos, float yPos, const s
 {
 	m_riderXOffset = 9;
 	m_riderYOffset = -4;
+	m_riderIndex = 2;
 	m_objectName = m_objectName;
+	
+	m_riderSprite.setTextureRect(m_assetRegistry.LoadSprite("rider", m_riderIndex));
+
 	InitVariables();
 	InitAnimations();
 

@@ -4,8 +4,8 @@
 
 
 Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
-	: m_inputManager(inputManager), m_assetRegistry(assetRegistry), m_player1ScoreText(m_font), 
-    m_player2ScoreText(m_font), m_player1LivesSprite(m_player1LivesSprite), m_player2LivesSprite(m_player2LivesSprite)
+    : m_inputManager(inputManager), m_assetRegistry(assetRegistry), m_player1ScoreText(m_font),
+    m_player2ScoreText(m_font)
 {
 	// Load the sprite sheet
     m_assetRegistry.LoadSpriteSheet();
@@ -20,19 +20,32 @@ Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
     m_platforms.push_back(std::make_unique<Platform>(m_assetRegistry, SCREEN_WIDTH - 84.f, 200.f, "top_right_platform"));
     m_platforms.push_back(std::make_unique<Platform>(m_assetRegistry, SCREEN_WIDTH - 85.f, 375.f, "bottom_right_platform"));
 
-    // Create the lava
+    // --- Create the lava ---
     m_lava.setFillColor(sf::Color(255, 32, 0, 255));
     m_lava.setSize(sf::Vector2f(SCREEN_WIDTH, 50.f));
     m_lava.setPosition(sf::Vector2f(0.f, SCREEN_HEIGHT - m_lava.getGlobalBounds().size.y));
 
-    //  --- Create the sprites for lives --- //
-    m_player1LivesSprite.setTexture(assetRegistry.LoadTexture());
-    m_player1LivesSprite.setTextureRect(assetRegistry.LoadSprite("rider"));
-    m_player1LivesSprite.setPosition(sf::Vector2f(160.f, 160.f));
+    // --- Create the lives icons ---
+    int xPos = 195.f;
+    int yPos = SCREEN_HEIGHT - 55.f;
+    int iconWidth = 24.f;
+    int padding = 2.f;
 
-    m_player2LivesSprite.setTexture(assetRegistry.LoadTexture());
-    m_player2LivesSprite.setTextureRect(assetRegistry.LoadSprite("rider"));
-    m_player2LivesSprite.setPosition(sf::Vector2f(160.f, 160.f));
+    // Loop through for player 1's icons
+    for (int i = 0; i < 5; i++)
+    {
+        m_player1LifeIcons.push_back(std::make_unique<LivesIcon>(m_assetRegistry, xPos, yPos, "rider", 0));
+        xPos = xPos + iconWidth + padding;
+    }
+
+    xPos = 350.f; // Update the x position for the player 2 icons
+
+    // Loop through for player 2's icons
+    for (int i = 0; i < 5; i++)
+    {
+        m_player2LifeIcons.push_back(std::make_unique<LivesIcon>(m_assetRegistry, xPos, yPos, "rider", 1));
+        xPos = xPos + iconWidth + padding;
+    }
      
     // Get the spawner locations
     for (auto& platform : m_platforms)
@@ -54,10 +67,6 @@ Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
     // --- Setup text --- //
     m_font = m_assetRegistry.GetFont(); // Get the font
 
-    // Add text to vector
-    m_allText.push_back(m_player1ScoreText);
-    m_allText.push_back(m_player2ScoreText);
-
     // Set the string and position for each text
     m_player1ScoreText.setString("Player 1: 0");
     m_player1ScoreText.setCharacterSize(18);
@@ -65,7 +74,7 @@ Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
     m_player1ScoreText.setFillColor(sf::Color::Yellow);
     m_player2ScoreText.setString("Player 2: 0");
     m_player2ScoreText.setCharacterSize(18);
-    m_player2ScoreText.setFillColor(sf::Color::Yellow);
+    m_player2ScoreText.setFillColor(sf::Color::Cyan);
     m_player2ScoreText.setPosition(sf::Vector2f(SCREEN_WIDTH - m_player2ScoreText.getGlobalBounds().size.x - 10.f, 10.f));
 
 }
@@ -123,11 +132,6 @@ void Game::SpawnPlayer(PlayerType type)
     }
 }
 
-void Game::SetText()
-{
-
-}
-
 void Game::Update(float deltaTime)
 {
     // Remove all enemies that are not alive
@@ -146,20 +150,37 @@ void Game::Update(float deltaTime)
     {
         characters.push_back(player.get());
 
+        // Set the UI for each player
         if (player->GetPlayerID() == 1)
         {
+            // --- Set the score text ---
             sf::String score = std::to_string(player->GetScore());
             m_player1ScoreText.setString("Player 1: " + score);
             m_player1ScoreText.setPosition(sf::Vector2f(10.f, 10.f));
+
+            // --- Set the life icons ---
+            if (player->GetLives() < m_player1Lives && !m_player1LifeIcons.empty())
+            {
+                m_player1LifeIcons.pop_back(); // Remove the last element
+                m_player1Lives--;
+            }
+
         }
 
         else if (player->GetPlayerID() == 2)
         {
+            // --- Set the score text ---
             sf::String score = std::to_string(player->GetScore());
             m_player2ScoreText.setString("Player 2: " + score);
             m_player2ScoreText.setPosition(sf::Vector2f(SCREEN_WIDTH - m_player2ScoreText.getGlobalBounds().size.x - 10.f, 10.f));
-        }
-            
+
+            // --- Set the life icons ---
+            if (player->GetLives() < m_player2Lives && !m_player2LifeIcons.empty())
+            {
+                m_player2LifeIcons.pop_back(); // Remove the last element
+                m_player2Lives--;
+            }
+        }  
     }
         
         
@@ -179,8 +200,10 @@ void Game::Update(float deltaTime)
             // Character-vs-platform collisions
             if (!character->GetIsSpawning())
             {
+                // Loop through the platforms
                 for (auto& platform : m_platforms)
                 {
+                    // Call the platforms collision
                     CollisionManager::HandlePlatformCollision(*character, *platform);
                 }
             }
@@ -212,26 +235,43 @@ void Game::UpdateInputs()
 
 void Game::Render(sf::RenderTarget& target)
 {
+    // --- Render the players ---
 	for (auto& player : m_players)
 	{
 		player->Render(target);
 	}
 
+
+    // --- Render the enemies ---
     for (auto& enemy : m_enemies)
     {
         enemy->Render(target);
     }
 
+
+    // --- Render the lava ---
     target.draw(m_lava);
 
+
+    // --- Render the platforms ---
 	for (auto& platform : m_platforms)
 	{
 		platform->Render(target);
 	}
 
+
+    // --- Render the text ---
     target.draw(m_player1ScoreText);
     target.draw(m_player2ScoreText);
 
-    target.draw(m_player1LivesSprite);
-    target.draw(m_player2LivesSprite);
+
+    // --- Render the life icons ---
+    for (auto& lifeIcon : m_player1LifeIcons)
+    {
+        lifeIcon->Render(target);
+    }
+    for (auto& lifeIcon : m_player2LifeIcons)
+    {
+        lifeIcon->Render(target);
+    }
 }
