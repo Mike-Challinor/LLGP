@@ -12,6 +12,7 @@
 #include "Hunter.h"
 #include "AssetRegistry.h"
 #include "CollisionManager.h"
+#include "LivesIcon.h"
 
 enum class EnemyType
 {
@@ -33,20 +34,22 @@ private:
 	LLGP::InputManager& m_inputManager;
 	LLGP::AssetRegistry& m_assetRegistry;
 
+	// Ints
+	int m_player1Lives = 5;
+	int m_player2Lives = 5;
+
 	// Vectors
 	std::vector<std::unique_ptr<Player>> m_players;
 	std::vector<std::unique_ptr<Platform>> m_platforms;
 	std::vector<std::unique_ptr<Enemy>> m_enemies;
+	std::vector<std::unique_ptr<LivesIcon>> m_player1LifeIcons;
+	std::vector<std::unique_ptr<LivesIcon>> m_player2LifeIcons;
 	std::vector<sf::Vector2f> m_spawnPositions;
-	std::vector<sf::Text> m_allText;
-	std::vector<sf::Sprite> m_player1LivesSprites;
-	std::vector<sf::Sprite> m_player2LivesSprites;
 
 	// Functions
 	sf::Vector2f GetRandomSpawnLocation();
 	void SpawnEnemy(EnemyType type);
 	void SpawnPlayer(PlayerType type);
-	void SetText();
 
 	// Text
 	sf::Font m_font;
@@ -54,9 +57,8 @@ private:
 	sf::Text m_player2ScoreText;
 
 	// Shapes
+	sf::Texture m_texture;
 	sf::RectangleShape m_lava;
-	sf::Sprite m_player1LivesSprite;
-	sf::Sprite m_player2LivesSprite;
 
 public:
 	Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry);

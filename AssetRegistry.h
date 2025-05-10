@@ -45,7 +45,7 @@ namespace LLGP
 		sf::Font GetFont();
 		const std::unordered_map<std::string, sf::IntRect>& LoadPlatformSprites();
 		const std::unordered_map<std::string, sf::IntRect>& LoadSprites(sf::String name);
-		const sf::IntRect& LoadSprite(const std::string& name);
+		const sf::IntRect& LoadSprite(const std::string& name, int index);
 		sf::Texture& LoadTexture();
 	};
 }

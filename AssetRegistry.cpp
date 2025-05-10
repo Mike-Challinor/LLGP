@@ -57,7 +57,7 @@ void LLGP::AssetRegistry::StoreTextureMaps()
 	PopulateTextureMap(m_storkTextures, 7, "stork", 28, 40, 2, 76, 4);
 
 	// Load the rider textures
-	PopulateTextureMap(m_riderTextures, 2, "rider", 24, 14, 6, 214, 8);
+	PopulateTextureMap(m_riderTextures, 3, "rider", 24, 14, 6, 214, 8);
 
 	// Load the vulture textures
 	PopulateTextureMap(m_enemyTextures, 4, "enemy", 30, 28, 2, 149, 1);
@@ -80,7 +80,7 @@ void LLGP::AssetRegistry::StoreTextureMaps()
 void LLGP::AssetRegistry::LoadSpriteSheet()
 {
 	// Set player texture
-	if (!this->m_spriteSheet.loadFromFile("Resources/Sprites/JoustSpriteSheet2.png"))
+	if (!this->m_spriteSheet.loadFromFile("Resources/Sprites/JoustSpriteSheet3.png"))
 	{
 		throw std::runtime_error("Failed to load texture: joustsprites.png");
 	}
@@ -152,6 +152,10 @@ const std::unordered_map<std::string, sf::IntRect>& LLGP::AssetRegistry::LoadSpr
 	{
 		return m_enemyTextures;
 	}
+	else if (name == "rider")
+	{
+		return m_riderTextures;
+	}
 	else
 	{
 		throw std::runtime_error("Invalid sprite name provided to LoadSprites: " + name);
@@ -159,31 +163,20 @@ const std::unordered_map<std::string, sf::IntRect>& LLGP::AssetRegistry::LoadSpr
 
 }
 
-const sf::IntRect& LLGP::AssetRegistry::LoadSprite(const std::string& name)
+const sf::IntRect& LLGP::AssetRegistry::LoadSprite(const std::string& name, int index)
 {
 	if (name == "rider")
 	{
-		// Collect all rider frames
-		std::vector<const sf::IntRect*> riderRects;
-		for (const auto& [key, rect] : m_riderTextures)
+		// Construct the key name from index
+		std::string key = name + std::to_string(index);
+
+		auto it = m_riderTextures.find(key);
+		if (it == m_riderTextures.end())
 		{
-			if (key.find("rider") == 0)
-				riderRects.push_back(&rect);
+			throw std::out_of_range("No rider texture at index: " + std::to_string(index));
 		}
 
-		if (riderRects.empty())
-		{
-			throw std::runtime_error("No rider textures found");
-		}
-
-		// Pick a random one
-		static std::random_device rd;
-		static std::mt19937 gen(rd());
-		std::uniform_int_distribution<size_t> dist(0, riderRects.size() - 1);
-
-		return *riderRects[dist(gen)];
+		return it->second;
 	}
-
-	throw std::runtime_error("Unhandled sprite name: " + name);
 }
 

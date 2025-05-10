@@ -4,7 +4,7 @@ Character::Character(LLGP::AssetRegistry& assetRegistry, float xPos, float yPos,
 	GameObject(assetRegistry, xPos, yPos, objectName), m_riderSprite(m_texture)
 {
 	// Set the rider sprite
-	m_riderSprite.setTextureRect(m_assetRegistry.LoadSprite("rider"));
+	m_riderSprite.setTextureRect(m_assetRegistry.LoadSprite("rider", m_riderIndex));
 	SetRiderPosition();
 
 	UpdateFeetPosition();

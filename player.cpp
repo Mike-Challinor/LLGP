@@ -11,8 +11,26 @@ Player::Player(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegis
 	m_canCollide = true;
 	m_pointValue = POINTS_VALUE_PLAYER;
 
+	// --- Set player variables based off of playerID ---
+	if (m_playerID == 1)
+	{
+		m_riderIndex = 0;
+		m_playerColour = sf::Color::Yellow;
+	}
+	
+	else
+	{
+		m_riderIndex = 1;
+		m_playerColour = sf::Color::Cyan;
+	}
+
+	// Set the rect to the correct sprite for the players rider
+	m_riderSprite.setTextureRect(m_assetRegistry.LoadSprite("rider", m_riderIndex));
+
+	// Set the usable keys for the player
 	SetUsableKeys(inputManager);
 
+	// Initialise the animations
 	InitAnimations();
 }
 
@@ -171,6 +189,11 @@ void Player::OnKeyReleased(LLGP::Key key)
 int Player::GetScore() const
 {
 	return m_score;
+}
+
+int Player::GetLives() const
+{
+	return m_lives;
 }
 
 int Player::GetPlayerID() const
