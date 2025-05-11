@@ -7,10 +7,6 @@
 
 using namespace std;
 
-/*
-    This version of the SFML "hello world" is statically linked, you may wish to try the dynamically linked version as well.
-*/
-
 int WinMain()
 {
     // Create window

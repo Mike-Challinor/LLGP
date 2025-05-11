@@ -15,6 +15,7 @@ public:
 	// Functions
 	virtual void DecideNextMove();
 	void ResetTarget();
+	void MoveTowardsTarget(const sf::Vector2f& target, float deltaTime);
 
 	// Modifier functions
 	void RemoveRider();
