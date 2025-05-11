@@ -1,11 +1,12 @@
 #include "Hunter.h"
 
 Hunter::Hunter(LLGP::AssetRegistry& assetRegistry,
+    WaypointManager& waypointManager,
     float xPos,
     float yPos,
     const std::string& objectName,
     const std::vector<std::unique_ptr<Player>>& players)
-    : Enemy(assetRegistry, xPos, yPos, objectName)
+    : Enemy(assetRegistry, waypointManager, xPos, yPos, objectName)
 {
     debugName = "Hunter";
     m_pointValue = POINTS_VALUE_HUNTER;
@@ -45,8 +46,10 @@ void Hunter::FindTarget()
     SetTarget(closestPos);
 }
 
-void Hunter::DecideNextMove()
+void Hunter::DecideNextMove(float deltaTime)
 {   
+    Enemy::DecideNextMove(deltaTime);
+
     if (m_hasCollided)
     {
         // Find a target off screen

@@ -236,7 +236,7 @@ void Character::SetRiderPosition()
 	sf::Vector2f origin = m_sprite.getOrigin();
 	sf::Vector2f scale = m_sprite.getScale();
 
-	int xOffset = m_riderXOffset;
+	float xOffset = m_riderXOffset;
 
 	if (!m_isFacingRight)
 	{

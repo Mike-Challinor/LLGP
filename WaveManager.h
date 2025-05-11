@@ -13,8 +13,8 @@ private:
     const int m_maxEnemies = 7;
 
     // Floats
-    float m_waveDelayTime = 0.2;
-    float m_enemySpawnTime = 0.2;
+    float m_waveDelayTime = 0.2f;
+    float m_enemySpawnTime = 0.2f;
 
     // Bools
     bool m_isWaveActive = false;

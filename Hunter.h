@@ -7,6 +7,7 @@ class Hunter : public Enemy
 {
 public:
     Hunter(LLGP::AssetRegistry& assetRegistry, 
+        WaypointManager& waypointManager,
         float xPos, 
         float yPos, 
         const std::string& objectName = "hunter", 
@@ -20,6 +21,6 @@ private:
 
 
     void FindTarget() override;
-    void DecideNextMove() override;
+    void DecideNextMove(float deltaTime) override;
 };
 

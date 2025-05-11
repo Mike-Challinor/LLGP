@@ -26,10 +26,10 @@ Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
     m_lava.setPosition(sf::Vector2f(0.f, SCREEN_HEIGHT - m_lava.getGlobalBounds().size.y));
 
     // --- Create the lives icons ---
-    int xPos = 195.f;
-    int yPos = SCREEN_HEIGHT - 55.f;
-    int iconWidth = 24.f;
-    int padding = 2.f;
+    int xPos = 195;
+    int yPos = SCREEN_HEIGHT - 55;
+    int iconWidth = 24;
+    int padding = 2;
 
     // Loop through for player 1's icons
     for (int i = 0; i < 5; i++)
@@ -38,7 +38,7 @@ Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
         xPos = xPos + iconWidth + padding;
     }
 
-    xPos = 350.f; // Update the x position for the player 2 icons
+    xPos = 350; // Update the x position for the player 2 icons
 
     // Loop through for player 2's icons
     for (int i = 0; i < 5; i++)
@@ -73,19 +73,17 @@ Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
     m_player2ScoreText.setFillColor(sf::Color::Cyan);
     m_player2ScoreText.setPosition(sf::Vector2f(SCREEN_WIDTH - m_player2ScoreText.getGlobalBounds().size.x - 10.f, 10.f));
 
+    // Create the waypoints
+    CreateWaypoints();
+
     // Start the wave manager
     m_waveManager.StartWave();
-
-
-
-    //// Create enemies
-    //SpawnEnemy(EnemyType::Bounder);
-    //SpawnEnemy(EnemyType::Hunter);
 
 }
 
 Game::~Game()
 {
+
 }
 
 sf::Vector2f Game::GetRandomSpawnLocation()
@@ -113,11 +111,11 @@ void Game::SpawnEnemy(EnemyType type)
     switch (type)
     {
     case EnemyType::Bounder:
-        SpawnCharacter<Bounder>(m_enemies, m_assetRegistry, spawnPos.x - 14.f, spawnPos.y, "enemy");
+        SpawnCharacter<Bounder>(m_enemies, m_assetRegistry, m_waypointManager, spawnPos.x - 14.f, spawnPos.y, "enemy");
         break;
 
     case EnemyType::Hunter:
-        SpawnCharacter<Hunter>(m_enemies, m_assetRegistry, spawnPos.x - 14.f, spawnPos.y, "enemy", m_players);
+        SpawnCharacter<Hunter>(m_enemies, m_assetRegistry, m_waypointManager, spawnPos.x - 14.f, spawnPos.y, "enemy", m_players);
         break;
     }
 
@@ -170,6 +168,26 @@ void Game::SchedulePlayersForDeletion()
         }
     }
 }
+
+void Game::CreateWaypoints()
+{
+    for (const auto& platform : m_platforms)
+    {
+        sf::Vector2f pos = platform->GetPosition();
+        float width = platform->GetSize().x;
+
+        // Left edge
+        m_waypointManager.AddWaypoint(std::make_unique<Waypoint>(pos.x, pos.y - 40.f));
+
+        // Center
+        m_waypointManager.AddWaypoint(std::make_unique<Waypoint>(pos.x + width / 2.f, pos.y - 40.f));
+
+        // Right edge
+        m_waypointManager.AddWaypoint(std::make_unique<Waypoint>(pos.x + width, pos.y - 40.f));
+    }
+}
+
+
 
 void Game::Update(float deltaTime)
 {

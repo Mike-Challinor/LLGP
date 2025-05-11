@@ -1,7 +1,7 @@
 #include "Enemy.h"
 
-Enemy::Enemy(LLGP::AssetRegistry& assetRegistry, float xPos, float yPos, const std::string& objectName) :
-	Character(assetRegistry, xPos, yPos, objectName)
+Enemy::Enemy(LLGP::AssetRegistry& assetRegistry, WaypointManager& waypointManager, float xPos, float yPos, const std::string& objectName) :
+	Character(assetRegistry, xPos, yPos, objectName), m_waypointManager(waypointManager)
 {
 	m_riderXOffset = 9;
 	m_riderYOffset = -4;
@@ -43,6 +43,12 @@ void Enemy::InitAnimations()
 void Enemy::InitVariables()
 {
 	m_movementSpeed = ENEMY_MAX_WALKING_SPEED;
+
+	// Initialize the first waypoint if available
+	if (!m_currentWaypoint && m_waypointManager.HasWaypoints())
+	{
+		m_currentWaypoint = m_waypointManager.GetNextWaypoint();
+	}
 
 	if (m_sprite.getGlobalBounds().position.x + (m_sprite.getGlobalBounds().size.x / 2) > SCREEN_WIDTH / 2)
 	{
@@ -117,6 +123,46 @@ void Enemy::MoveTowardsTarget(const sf::Vector2f& target, float deltaTime)
 	}
 }
 
+void Enemy::MoveTowardsWaypoint(float deltaTime) {
+	if (m_currentWaypoint == nullptr) {
+		m_currentWaypoint = m_waypointManager.GetNextWaypoint();
+		if (m_currentWaypoint == nullptr) {
+			return;
+		}
+	}
+
+	sf::Vector2f currentPosition = GetPosition();
+	sf::Vector2f direction = m_currentWaypoint->position - currentPosition;
+
+	float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+
+	// If close enough, consider the waypoint reached and stop
+	if (distance < 0.1f) {
+		if (!m_currentWaypoint->isActivated) {
+			m_currentWaypoint->isActivated = true;
+			// Optionally play animation or add delay before moving to the next waypoint
+		}
+		return;  // Stop moving
+	}
+
+	// Normalize the direction and apply movement speed
+	direction /= distance;
+	m_velocity = direction * m_movementSpeed;
+
+	// Update position based on velocity
+	sf::Vector2f newPosition = currentPosition + m_velocity * deltaTime;
+	SetPosition(newPosition.x, newPosition.y);
+
+	m_isMoving = true;
+
+	// Flip sprite if needed
+	if (direction.x < 0 && m_isFacingRight || direction.x > 0 && !m_isFacingRight) {
+		FlipSprite();
+	}
+}
+
+
+
 
 void Enemy::FindTarget()
 {
@@ -155,7 +201,7 @@ void Enemy::SetRiderPosition()
 	sf::Vector2f scale = m_sprite.getScale();
 
 	// Calculate xOffset based on facing direction
-	int xOffset = m_riderXOffset;
+	float xOffset = m_riderXOffset;
 
 	if (!m_isFacingRight)
 	{
@@ -176,16 +222,35 @@ void Enemy::SetRiderPosition()
 
 void Enemy::Update(float deltaTime)
 {
-	DecideNextMove();
+	DecideNextMove(deltaTime);
+	FindTarget();
 	MoveTowardsTarget(m_targetPosition, deltaTime);
+	//MoveTowardsWaypoint(deltaTime);
 
 	Character::Update(deltaTime);
 }
 
-void Enemy::DecideNextMove()
+void Enemy::DecideNextMove(float deltaTime) 
 {
-	FindTarget();
+	// If the current waypoint is reached, pick a new one
+	if (m_currentWaypoint && m_currentWaypoint->isActivated) 
+	{
+		if (m_waitTime <= 0) {
+			m_currentWaypoint = m_waypointManager.GetNextWaypoint();
+			m_waitTime = ENEMY_WAIT_TIME;  // Reset wait time
+		}
+		else 
+		{
+			m_waitTime -= deltaTime;  // Decrease wait time
+		}
+	}
+
+	if (m_currentWaypoint == nullptr) {
+		// No waypoints left or no target defined, find a new target
+		FindTarget();
+	}
 }
+
 
 void Enemy::ResetTarget()
 {

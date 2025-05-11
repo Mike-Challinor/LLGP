@@ -43,6 +43,16 @@ sf::FloatRect GameObject::GetCollisionBounds()
 	return m_sprite.getGlobalBounds();
 }
 
+sf::Vector2f GameObject::GetPosition()
+{
+	return m_sprite.getGlobalBounds().position;
+}
+
+sf::Vector2f GameObject::GetSize()
+{
+	return m_sprite.getGlobalBounds().size;
+}
+
 void GameObject::Render(sf::RenderTarget& target)
 {
 	target.draw(m_sprite);

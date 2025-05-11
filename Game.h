@@ -35,6 +35,7 @@ private:
 	LLGP::InputManager& m_inputManager;
 	LLGP::AssetRegistry& m_assetRegistry;
 	WaveManager m_waveManager;
+	WaypointManager m_waypointManager;
 
 	// Ints
 	int m_player1Lives = 5;
@@ -57,6 +58,7 @@ private:
 	void RespawnPlayer(Player& player);
 	void ErasePlayers();
 	void SchedulePlayersForDeletion();
+	void CreateWaypoints();
 
 	// Update functions
 	void UpdateWaveManager(float deltaTime);

@@ -87,6 +87,9 @@
     <ClCompile Include="WaveManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="WaypointManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="packages\SFML\include\SFML\Audio.hpp">
@@ -450,6 +453,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WaveManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WaypointManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
