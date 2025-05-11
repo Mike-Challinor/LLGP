@@ -70,7 +70,7 @@ void Character::SetAnimationState()
 
 	if (m_isJumping || m_isFalling)
 	{
-		adjustedFrameTime = adjustedFrameTime * 100000.f;
+		adjustedFrameTime = adjustedFrameTime * 0.1f;
 
 		if (m_animationComponent->GetState() != LLGP::flying)
 		{
@@ -83,7 +83,7 @@ void Character::SetAnimationState()
 	{
 		if (m_isMoving)
 		{
-			adjustedFrameTime = adjustedFrameTime * 30000.f;
+			adjustedFrameTime = adjustedFrameTime * 0.02f;
 
 			if (m_animationComponent->GetState() != LLGP::walking)
 			{
@@ -220,7 +220,7 @@ void Character::MoveToSpawnPosition()
 {
 	debugName;
 
-	m_sprite.setPosition(sf::Vector2f(m_sprite.getGlobalBounds().position.x, m_sprite.getPosition().y - 0.1f));
+	m_sprite.setPosition(sf::Vector2f(m_sprite.getGlobalBounds().position.x, m_sprite.getPosition().y - 1.1f));
 	float yPos = m_sprite.getGlobalBounds().position.y + m_sprite.getGlobalBounds().size.y - 25.f;
 
 	if (yPos < m_spawnPosition.y)

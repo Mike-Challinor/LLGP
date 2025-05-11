@@ -15,7 +15,7 @@ private:
 	LLGP::InputManager& m_inputManager; // Reference to an existing InputManager
 
 	// Components
-	Timer m_respawnTimer{ 900000.0f }; // Time duration
+	Timer m_respawnTimer{ 0.1f }; // Time duration
 
 	// Vectors
 	std::vector<LLGP::Key> m_usableKeys;

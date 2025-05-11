@@ -74,52 +74,49 @@ void Enemy::SetTarget(sf::Vector2f targetPosition)
 	m_targetPosition = targetPosition;
 }
 
-void Enemy::MoveToTarget()
+void Enemy::MoveTowardsTarget(const sf::Vector2f& target, float deltaTime)
 {
-	if (m_hasTarget)
+	// Get the current position of the enemy
+	sf::Vector2f currentPosition = GetPosition();
+
+	// Calculate the direction vector from the current position to the target
+	sf::Vector2f direction = target - currentPosition;
+
+	// Get the distance from the current position to the target
+	float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+
+	// If the distance is small enough, stop the movement
+	if (distance < 0.1f)
 	{
-		sf::Vector2f currentPos = m_sprite.getPosition();
-		sf::Vector2f direction = m_targetPosition - currentPos;
-
-		if (direction.x < 0 && m_isFacingRight || direction.x > 0 && !m_isFacingRight)
-		{
-			FlipSprite();
-		}
-
-		float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-
-		if (distance > 0.1f)
-		{
-			direction /= distance;
-
-			if (m_isFalling)
-			{
-				m_movementSpeed = ENEMY_MAX_FLYING_HORIZONTAL_SPEED;
-				m_verticalMovementSpeed = ENEMY_MAX_FLYING_VERTICAL_SPEED;
-			}
-
-			else
-			{
-				m_movementSpeed = ENEMY_MAX_WALKING_SPEED;
-				m_verticalMovementSpeed = ENEMY_MAX_WALKING_SPEED;
-			}
-
-			// Apply the horizontal movement
-			m_velocity.x = direction.x * m_movementSpeed;
-			m_velocity.y = direction.y * m_verticalMovementSpeed;
-
-			m_isMoving = true;
-		}
-		else
-		{
-			m_velocity = { 0.f, 0.f };
-			m_isMoving = false;
-			m_hasTarget = false;
-			FlipSprite();
-		}
+		m_velocity = { 0.f, 0.f }; // Stop the movement
+		m_isMoving = false;
+		m_hasTarget = false;
+		FlipSprite(); 
+		return;
 	}
-	
+
+	// Normalize the direction vector (make it a unit vector)
+	direction /= distance;
+
+	// Scale the velocity by movement speed
+	float speed = m_movementSpeed; // Use the movement speed here
+	m_velocity = direction * speed; // Velocity is the direction times speed
+
+	// Apply the velocity to the position (using deltaTime for frame-rate independence)
+	sf::Vector2f newPosition = currentPosition + m_velocity * deltaTime;
+
+	// Update position directly using velocity
+	SetPosition(newPosition.x, newPosition.y);
+
+	m_isMoving = true;
+
+	// Optional: Update animation or sprite based on direction (e.g., flip sprite)
+	if (direction.x < 0 && m_isFacingRight || direction.x > 0 && !m_isFacingRight)
+	{
+		FlipSprite();
+	}
 }
+
 
 void Enemy::FindTarget()
 {
@@ -180,8 +177,7 @@ void Enemy::SetRiderPosition()
 void Enemy::Update(float deltaTime)
 {
 	DecideNextMove();
-	MoveToTarget();
-	//MoveTowardsTarget(m_targetPosition, deltaTime);
+	MoveTowardsTarget(m_targetPosition, deltaTime);
 
 	Character::Update(deltaTime);
 }
@@ -195,30 +191,6 @@ void Enemy::ResetTarget()
 {
 	m_hasCollided = true;
 	m_hasTarget = false;
-}
-
-void Enemy::MoveTowardsTarget(const sf::Vector2f& target, float deltaTime)
-{
-	// Get the current position of the enemy
-	sf::Vector2f currentPosition = GetPosition();
-
-	// Calculate the direction vector from the current position to the target
-	sf::Vector2f direction = target - currentPosition;
-
-	// Get the distance from the current position to the target
-	float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-
-	// Normalize the direction vector to make it a unit vector (just the direction, not the magnitude)
-	direction /= distance;
-
-	// Speed scaling based on distance
-	float speed = ENEMY_MAX_WALKING_SPEED;
-
-	// Calculate the new position based on the direction, speed, and deltaTime
-	sf::Vector2f newPosition = currentPosition + direction * speed * deltaTime;
-
-	// Set the new position of the enemy
-	SetPosition(newPosition.x, newPosition.y);
 }
 
 void Enemy::RemoveRider()

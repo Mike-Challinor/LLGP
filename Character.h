@@ -131,7 +131,7 @@ private:
 
 	// Floats
 	float m_collisionCooldown = 0.f;
-	const float m_maxCollisionCooldown = 150000.f; // 1.5 seconds
+	const float m_maxCollisionCooldown = 0.015f;
 
 	// Functions
 	void CreateAnimationComponent(sf::Sprite& sprite, const std::string& name);
