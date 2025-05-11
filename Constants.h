@@ -8,11 +8,11 @@
 #define TILE_WIDTH 32
 #define TILE_HEIGHT 32
 
-const float JUMP_FORCE_DECREMENT = 0.01f;
-const float COLLISION_FORCE_DECREMENT = 0.01f;
-const float INITIAL_JUMP_FORCE = 1.3f;
-const float INITIAL_COLLISION_FORCE = 1.15f;
-const float COLLISION_MAX_FORCE = 1.5f;
+const float JUMP_FORCE_DECREMENT = 0.5f;
+const float COLLISION_FORCE_DECREMENT = 1.5f;
+const float INITIAL_JUMP_FORCE = 10.f;
+const float INITIAL_COLLISION_FORCE = 7.5f;
+const float COLLISION_MAX_FORCE = 10.f;
 
 const int POINTS_VALUE_BOUNDER = 500;
 const int POINTS_VALUE_HUNTER = 750;

@@ -20,18 +20,20 @@ int WinMain()
 
     // Set variables for fixed update
     std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
-    float deltaTime = 0;
-    float timeSinceLastPhysicsLoop = 0;
-    float physicsTimeStep = 2000;
-    float inputTimeStep = 2000;
-    float timeSinceLastInputLoop = 0;
+    float deltaTime = 0.0f;
+    float timeSinceLastPhysicsLoop = 0.0f;
+    float physicsTimeStep = 0.016f;
+    float inputTimeStep = 0.016f;
+    float timeSinceLastInputLoop = 0.0f;
 
     // Main loop
     while (window.isOpen())
     {
         // Update time related floats
-        deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - lastTime).count();
-        lastTime = std::chrono::steady_clock::now();
+        auto now = std::chrono::steady_clock::now();
+        deltaTime = std::chrono::duration<float>(now - lastTime).count(); // Convert to seconds
+        lastTime = now;
+
         timeSinceLastPhysicsLoop += deltaTime;
         timeSinceLastInputLoop += deltaTime;
 

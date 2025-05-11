@@ -175,14 +175,6 @@ void Game::Update(float deltaTime)
 {
     UpdateWaveManager(deltaTime);
 
-    //// Remove all enemies that are not alive
-    //m_enemies.erase(
-    //    std::remove_if(m_enemies.begin(), m_enemies.end(),
-    //        [](const std::unique_ptr<Enemy>& e) {
-    //            return !e->GetIsAlive();
-    //        }),
-    //    m_enemies.end());
-
     // Remove all enemies that are not alive
     m_enemies.erase(
         std::remove_if(m_enemies.begin(), m_enemies.end(),
