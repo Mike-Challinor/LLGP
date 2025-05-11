@@ -5,7 +5,7 @@
 
 Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
     : m_inputManager(inputManager), m_assetRegistry(assetRegistry), m_player1ScoreText(m_font),
-    m_player2ScoreText(m_font)
+    m_player2ScoreText(m_font), m_waveText(m_font)
 {
 	// Load the sprite sheet
     m_assetRegistry.LoadSpriteSheet();
@@ -60,10 +60,6 @@ Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
     SpawnPlayer(PlayerType::Player1);
     SpawnPlayer(PlayerType::Player2);
 
-    // Create enemies
-    SpawnEnemy(EnemyType::Bounder);
-    SpawnEnemy(EnemyType::Hunter);
-
     // --- Setup text --- //
     m_font = m_assetRegistry.GetFont(); // Get the font
 
@@ -76,6 +72,15 @@ Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
     m_player2ScoreText.setCharacterSize(18);
     m_player2ScoreText.setFillColor(sf::Color::Cyan);
     m_player2ScoreText.setPosition(sf::Vector2f(SCREEN_WIDTH - m_player2ScoreText.getGlobalBounds().size.x - 10.f, 10.f));
+
+    // Start the wave manager
+    m_waveManager.StartWave();
+
+
+
+    //// Create enemies
+    //SpawnEnemy(EnemyType::Bounder);
+    //SpawnEnemy(EnemyType::Hunter);
 
 }
 
@@ -132,58 +137,92 @@ void Game::SpawnPlayer(PlayerType type)
     }
 }
 
+void Game::RespawnPlayer(Player& player)
+{
+    // Set the players new location
+    sf::Vector2f spawnPos = GetRandomSpawnLocation();
+    player.SetPosition(spawnPos.x, spawnPos.y);
+
+    // Set player to be alive
+    player.SetIsAlive(true);
+}
+
+void Game::ErasePlayers()
+{
+    std::erase_if(m_players, [this](const std::unique_ptr<Player>& player) {
+        // Check if the player is in the list of pending removals
+        return std::find_if(
+            m_playersPendingRemoval.begin(),
+            m_playersPendingRemoval.end(),
+            [&](auto* ptr) { return ptr == &player; }) != m_playersPendingRemoval.end();
+        });
+
+    m_playersPendingRemoval.clear();
+}
+
+void Game::SchedulePlayersForDeletion()
+{
+    for (auto& player : m_players)
+    {
+        if (player->GetLives() == 0)
+        {
+            m_playersPendingRemoval.push_back(&player);  // Store the pointer of the player to be removed
+        }
+    }
+}
+
 void Game::Update(float deltaTime)
 {
+    UpdateWaveManager(deltaTime);
+
+    //// Remove all enemies that are not alive
+    //m_enemies.erase(
+    //    std::remove_if(m_enemies.begin(), m_enemies.end(),
+    //        [](const std::unique_ptr<Enemy>& e) {
+    //            return !e->GetIsAlive();
+    //        }),
+    //    m_enemies.end());
+
     // Remove all enemies that are not alive
     m_enemies.erase(
         std::remove_if(m_enemies.begin(), m_enemies.end(),
-            [](const std::unique_ptr<Enemy>& e) {
-                return !e->GetIsAlive();
+            [this](const std::unique_ptr<Enemy>& e) {
+                if (!e->GetIsAlive()) {
+                    // Call EnemyDefeated() before the enemy is removed
+                    m_waveManager.EnemyDefeated();
+                    return true; // Mark the enemy for removal
+                }
+                return false;
             }),
         m_enemies.end());
+
+
+    // Queue players for deletion (but don't erase yet)    
+    SchedulePlayersForDeletion();
 
     // Create a vector for all current characters
     std::vector<Character*> characters; 
 
-    // Loop through and add all players to the characters list
+    // Loop through players and apply updates
     for (auto& player : m_players)
     {
-        characters.push_back(player.get());
+        // Add to active characters list
+        characters.push_back(player.get()); 
 
-        // Set the UI for each player
-        if (player->GetPlayerID() == 1)
+        // Update the UI for each player
+        UpdateUI(*player);
+
+        // --- Respawn players ---
+        if (!player->GetIsAlive())
         {
-            // --- Set the score text ---
-            sf::String score = std::to_string(player->GetScore());
-            m_player1ScoreText.setString("Player 1: " + score);
-            m_player1ScoreText.setPosition(sf::Vector2f(10.f, 10.f));
+            player->UpdateRespawnTimer(deltaTime);
 
-            // --- Set the life icons ---
-            if (player->GetLives() < m_player1Lives && !m_player1LifeIcons.empty())
+            if (player->GetCanRespawn())
             {
-                m_player1LifeIcons.pop_back(); // Remove the last element
-                m_player1Lives--;
+                RespawnPlayer(*player);
             }
-
         }
-
-        else if (player->GetPlayerID() == 2)
-        {
-            // --- Set the score text ---
-            sf::String score = std::to_string(player->GetScore());
-            m_player2ScoreText.setString("Player 2: " + score);
-            m_player2ScoreText.setPosition(sf::Vector2f(SCREEN_WIDTH - m_player2ScoreText.getGlobalBounds().size.x - 10.f, 10.f));
-
-            // --- Set the life icons ---
-            if (player->GetLives() < m_player2Lives && !m_player2LifeIcons.empty())
-            {
-                m_player2LifeIcons.pop_back(); // Remove the last element
-                m_player2Lives--;
-            }
-        }  
     }
-        
-        
 
     // Loop through and add all enemies to the characters list
     for (auto& enemy : m_enemies)
@@ -223,6 +262,11 @@ void Game::Update(float deltaTime)
         }
     }
 
+    // --- Remove all players that are not alive ---
+    if (!m_playersPendingRemoval.empty())
+    {
+        ErasePlayers();
+    }
 }
 
 void Game::UpdateInputs()
@@ -231,6 +275,73 @@ void Game::UpdateInputs()
 	{
 		player->UpdateInput();
 	}
+}
+
+void Game::UpdateUI(Player& player)
+{
+    //  --- Set the UI for each player ---
+    if (player.GetPlayerID() == 1)
+    {
+        // Set the score text
+        sf::String score = std::to_string(player.GetScore());
+        m_player1ScoreText.setString("Player 1: " + score);
+        m_player1ScoreText.setPosition(sf::Vector2f(10.f, 10.f));
+
+        // Set the life icons
+        if (player.GetLives() < m_player1Lives && !m_player1LifeIcons.empty())
+        {
+            m_player1LifeIcons.pop_back(); // Remove the last element
+            m_player1Lives = player.GetLives();
+        }
+
+    }
+
+    else if (player.GetPlayerID() == 2)
+    {
+        // --- Set the score text ---
+        sf::String score = std::to_string(player.GetScore()); // Get the score and convert the int to a string
+        m_player2ScoreText.setString("Player 2: " + score); // Set the string
+        // Update the texts position relevant to its size
+        m_player2ScoreText.setPosition(sf::Vector2f(SCREEN_WIDTH - m_player2ScoreText.getGlobalBounds().size.x - 10.f, 10.f));
+
+        // --- Set the life icons ---
+        if (player.GetLives() < m_player2Lives && !m_player2LifeIcons.empty())
+        {
+            m_player2LifeIcons.pop_back(); // Remove the last element
+            m_player2Lives = player.GetLives();
+        }
+    }
+
+    // Update UI for wave
+    if (m_currentWave != m_waveManager.GetCurrentWave())
+    {
+        sf::String waveNumber = std::to_string(m_waveManager.GetCurrentWave()); // Get the current wave number and convert to string
+        m_waveText.setString("Wave " + waveNumber); // Set the string
+        //Update the texts position relevant to its size
+        m_waveText.setPosition(sf::Vector2f((SCREEN_WIDTH / 2) - (m_waveText.getGlobalBounds().size.x / 2), 100.f));
+    }
+}
+
+void Game::UpdateWaveManager(float deltaTime)
+{
+    // Update the wave manager
+    m_waveManager.Update(deltaTime);
+
+    // If the remaining enemies equals 0, then end the wave
+    if (m_waveManager.GetRemainingEnemies() == 0)
+    {
+        m_waveManager.EndWave();
+    }
+
+    else
+    {
+        // Spawn enemy if allowed
+        if (m_waveManager.GetCanSpawnEnemy())
+        {
+            SpawnEnemy(EnemyType::Bounder);
+            m_waveManager.EnemySpawned();
+        }
+    }
 }
 
 void Game::Render(sf::RenderTarget& target)
@@ -263,6 +374,7 @@ void Game::Render(sf::RenderTarget& target)
     // --- Render the text ---
     target.draw(m_player1ScoreText);
     target.draw(m_player2ScoreText);
+    target.draw(m_waveText);
 
 
     // --- Render the life icons ---

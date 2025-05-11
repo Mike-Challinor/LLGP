@@ -2,15 +2,20 @@
 
 #include "InputManager.h"
 #include "Character.h"
+#include "Timer.h"
 
 class Player : public Character
 {
 private:
 	// Bools
 	bool m_canInput;
+	bool m_canRespawn = false;
 
 	// Managers
 	LLGP::InputManager& m_inputManager; // Reference to an existing InputManager
+
+	// Components
+	Timer m_respawnTimer{ 900000.0f }; // Time duration
 
 	// Vectors
 	std::vector<LLGP::Key> m_usableKeys;
@@ -26,6 +31,10 @@ private:
 	// Lists
 	std::set<LLGP::Key> m_activeKeys;
 
+	// Maps
+	std::unordered_map<LLGP::Key, std::function<void()>> m_keyPressHandlers;
+	std::unordered_map<LLGP::Key, std::function<void()>> m_keyReleaseHandlers;
+
 	// Init functions
 	void InitAnimations() override;
 
@@ -34,6 +43,9 @@ private:
 
 	// Mutation functions
 	void SetUsableKeys(LLGP::InputManager& inputManager);
+
+	// Functions
+	void StartRespawnTimer();
 
 	// Update functions
 	void UpdateForceDecrement() override;
@@ -52,15 +64,18 @@ public:
 	int GetScore() const;
 	int GetLives() const;
 	int GetPlayerID() const;
+	int GetCanRespawn() const;
 
 	// Mutator functions
 	void Despawn() override;
 	void AddScore(int pointsToAdd);
 	void AddNewForce(sf::Vector2f forceToAdd) override;
+	void SetIsAlive(bool isAlive);
 
 	// Update functions
 	void UpdateInput();
 	void Update(float deltaTime) override;
+	void UpdateRespawnTimer(float deltaTime);
 
 	// Render functions
 	void Render(sf::RenderTarget& target) override;

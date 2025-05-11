@@ -37,14 +37,11 @@ Player::Player(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegis
 // Destructor
 Player::~Player()
 {
-	// Set the key listeners
+	// Unsubscribe from key presses and releases
 	for (const auto& key : m_usableKeys)
 	{
-		// Remove key press listeners
-		m_inputManager.RemoveKeyPressListener(key, this, [this, key]() { keyInputListener(key); });
-
-		// Remove key released listeners
-		m_inputManager.RemoveKeyReleasedListener(key, this, [this, key]() { keyInputListener(key); });
+		m_inputManager.RemoveKeyPressListener(key, this, m_keyPressHandlers[key]);
+		m_inputManager.RemoveKeyReleasedListener(key, this, m_keyReleaseHandlers[key]);
 	}
 }
 
@@ -93,11 +90,18 @@ void Player::SetUsableKeys(LLGP::InputManager& inputManager)
 	for (const auto& key : m_usableKeys)
 	{
 		// Key press listeners
-		inputManager.AddKeyPressListener(key, this, [this, key]() { keyInputListener(key); });
+		m_keyPressHandlers[key] = [this, key]() { keyInputListener(key); };
+		m_inputManager.AddKeyPressListener(key, this, m_keyPressHandlers[key]);
 
 		// Key release listeners
-		inputManager.AddKeyReleasedListener(key, this, [this, key]() { OnKeyReleased(key); });
+		m_keyReleaseHandlers[key] = [this, key]() { OnKeyReleased(key); };
+		m_inputManager.AddKeyReleasedListener(key, this, m_keyReleaseHandlers[key]);
 	}
+}
+
+void Player::StartRespawnTimer()
+{
+	m_respawnTimer.Reset();
 }
 
 void Player::UpdateForceDecrement()
@@ -201,9 +205,16 @@ int Player::GetPlayerID() const
 	return m_playerID;
 }
 
+int Player::GetCanRespawn() const
+{
+	return m_canRespawn;
+}
+
 void Player::Despawn()
 {
 	m_lives--;
+	m_canRespawn = false;
+	m_respawnTimer.Start();
 	Character::Despawn();
 }
 
@@ -216,6 +227,11 @@ void Player::AddNewForce(sf::Vector2f forceToAdd)
 {
 	Character::AddNewForce(forceToAdd);
 	m_canInput = false;
+}
+
+void Player::SetIsAlive(bool isAlive)
+{
+	m_isAlive = isAlive;
 }
 
 // Update functions
@@ -232,7 +248,23 @@ void Player::UpdateInput()
 
 void Player::Update(float deltaTime)
 {
-	Character::Update(deltaTime);
+	// Update the player while alive
+	if (m_isAlive)
+	{
+		Character::Update(deltaTime);
+	}	
+}
+
+void Player::UpdateRespawnTimer(float deltaTime)
+{
+	// Update the respawn timer when dead
+	m_respawnTimer.Update(deltaTime);
+
+	// Allow respawning once timer has finished
+	if (m_respawnTimer.IsFinished() && m_lives != 0)
+	{
+		m_canRespawn = true;
+	}
 }
 
 void Player::Render(sf::RenderTarget& target)
