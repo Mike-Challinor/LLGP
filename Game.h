@@ -15,6 +15,7 @@
 #include "CollisionManager.h"
 #include "LivesIcon.h"
 
+// Enums
 enum class EnemyType
 {
 	Player,
@@ -35,6 +36,7 @@ private:
 	LLGP::InputManager& m_inputManager;
 	LLGP::AssetRegistry& m_assetRegistry;
 	WaveManager m_waveManager;
+	WaypointManager m_waypointManager;
 
 	// Ints
 	int m_player1Lives = 5;
@@ -57,6 +59,7 @@ private:
 	void RespawnPlayer(Player& player);
 	void ErasePlayers();
 	void SchedulePlayersForDeletion();
+	void CreateWaypoints();
 
 	// Update functions
 	void UpdateWaveManager(float deltaTime);
@@ -72,12 +75,16 @@ private:
 	sf::RectangleShape m_lava;
 
 public:
+	// Constructor and Destructor
 	Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry);
 	~Game();
 
+	// Update functions
 	void Update(float deltaTime);
 	void UpdateInputs();
 	void UpdateUI(Player& player);
+
+	// Render functions
 	void Render(sf::RenderTarget& target);
 
 	// Template function to spawn a character into a container

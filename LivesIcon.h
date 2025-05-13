@@ -9,8 +9,10 @@ public:
 	virtual ~LivesIcon();
 
 private:
+	// Modifier functions
 	void SetTexture() override;
 
+	// Ints
 	int m_spriteIndex;
 };
 

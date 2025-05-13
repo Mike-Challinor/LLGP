@@ -22,6 +22,8 @@ public:
 
 	// Accessor methods
 	sf::FloatRect GetCollisionBounds();
+	sf::Vector2f GetPosition();
+	sf::Vector2f GetSize();
 
 protected:
 	// Classes

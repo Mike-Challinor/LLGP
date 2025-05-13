@@ -10,10 +10,13 @@ namespace LLGP
 	class AssetRegistry
 	{
 	private:
+		// Textures
 		sf::Texture m_spriteSheet;
 
+		// Fonts
 		sf::Font m_joustFont;
 
+		// Maps
 		std::unordered_map<std::string, sf::IntRect> m_ostrichTextures;
 		std::unordered_map<std::string, sf::IntRect> m_storkTextures;
 		std::unordered_map<std::string, sf::IntRect> m_enemyTextures;
@@ -27,6 +30,7 @@ namespace LLGP
 		std::unordered_map<std::string, sf::IntRect> m_bottom_right_platformTextures;
 		std::unordered_map<std::string, sf::IntRect> m_top_right_platformTextures;
 
+		// Functions
 		void PopulateTextureMap(std::unordered_map<std::string, sf::IntRect>& texture_map,
 			int amount,
 			const std::string& name,
@@ -41,12 +45,14 @@ namespace LLGP
 		void InitFonts();
 
 	public:
+		// Functions
 		void LoadSpriteSheet();
-		sf::Font GetFont();
-		const std::unordered_map<std::string, sf::IntRect>& LoadPlatformSprites();
 		const std::unordered_map<std::string, sf::IntRect>& LoadSprites(sf::String name);
 		const sf::IntRect& LoadSprite(const std::string& name, int index);
 		sf::Texture& LoadTexture();
+
+		// Accessor functions
+		sf::Font GetFont();
 	};
 }
 

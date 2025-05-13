@@ -1,5 +1,6 @@
 #include "AssetRegistry.h"
 
+// --- Constructor ---
 void LLGP::AssetRegistry::PopulateTextureMap(std::unordered_map<std::string, sf::IntRect>& texture_map, 
 	int amount, 
 	const std::string& name, 
@@ -29,6 +30,7 @@ void LLGP::AssetRegistry::PopulateTextureMap(std::unordered_map<std::string, sf:
 	}
 }
 
+// --- Function for loading the font from file ---
 void LLGP::AssetRegistry::InitFonts()
 {
 	if (!m_joustFont.openFromFile("Resources/Fonts/joust.otf"))
@@ -38,6 +40,7 @@ void LLGP::AssetRegistry::InitFonts()
 	
 }
 
+// --- Function for adding a single sprite to a map ---
 void LLGP::AssetRegistry::AddSpriteToMap(std::unordered_map<std::string, sf::IntRect>& texture_map, 
 	const std::string& name, int xPos, int yPos, int width, int height)
 {
@@ -48,6 +51,7 @@ void LLGP::AssetRegistry::AddSpriteToMap(std::unordered_map<std::string, sf::Int
 	texture_map.insert({ name + std::to_string(texture_map.size()), tempIntRect });
 }
 
+// --- Function for setting all texture maps ---
 void LLGP::AssetRegistry::StoreTextureMaps()
 {
 	// Load the ostrich textures
@@ -77,12 +81,13 @@ void LLGP::AssetRegistry::StoreTextureMaps()
 
 }
 
+// --- Function for loading the sprite sheet from file ---
 void LLGP::AssetRegistry::LoadSpriteSheet()
 {
 	// Set player texture
 	if (!this->m_spriteSheet.loadFromFile("Resources/Sprites/JoustSpriteSheet3.png"))
 	{
-		throw std::runtime_error("Failed to load texture: joustsprites.png");
+		throw std::runtime_error("Failed to load texture: joustsprites.png"); // Handle errors from file not loading
 	}
 
 	else
@@ -91,21 +96,19 @@ void LLGP::AssetRegistry::LoadSpriteSheet()
 	}
 }
 
+// --- Function that returns the loaded font ---
 sf::Font LLGP::AssetRegistry::GetFont()
 {
 	return m_joustFont;	
 }
 
+// --- Function for returning the loaded sprite sheet ---
 sf::Texture& LLGP::AssetRegistry::LoadTexture()
 {
 	return m_spriteSheet;
 }
 
-const std::unordered_map<std::string, sf::IntRect>& LLGP::AssetRegistry::LoadPlatformSprites()
-{
-	return m_top_left_platformTextures;
-}
-
+// --- Function that returns the sprite map depending on the name passed through ---
 const std::unordered_map<std::string, sf::IntRect>& LLGP::AssetRegistry::LoadSprites(sf::String name)
 {
 	if (name == "ostrich")
@@ -163,6 +166,7 @@ const std::unordered_map<std::string, sf::IntRect>& LLGP::AssetRegistry::LoadSpr
 
 }
 
+// --- Function that returns a single sprite from a sprite map ---
 const sf::IntRect& LLGP::AssetRegistry::LoadSprite(const std::string& name, int index)
 {
 	if (name == "rider")

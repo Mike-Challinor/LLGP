@@ -151,8 +151,8 @@
     <ClCompile Include="Platform.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Enemy.cpp" />
-    <ClCompile Include="Timer.cpp" />
     <ClCompile Include="WaveManager.cpp" />
+    <ClCompile Include="WaypointManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnimationComponent.h" />
@@ -276,6 +276,7 @@
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="WaveManager.h" />
+    <ClInclude Include="WaypointManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages\SFML\include\SFML\Audio\SoundFileFactory.inl" />

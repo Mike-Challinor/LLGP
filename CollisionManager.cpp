@@ -1,11 +1,13 @@
 #include "CollisionManager.h"
 
+// --- Function that handles platform collisions ---
 void CollisionManager::HandlePlatformCollision(Character& character, Platform& platform)
 {
+    // Get and set the collision bounds of the character and platform
     sf::FloatRect playerBounds = character.GetCollisionBounds();
     sf::FloatRect platformBounds = platform.GetCollisionBounds();
 
-
+    // Check for intersection between the player and platform
     if (playerBounds.findIntersection(platformBounds).has_value())
     {
         // Center points
@@ -15,6 +17,7 @@ void CollisionManager::HandlePlatformCollision(Character& character, Platform& p
         float overlapX = (playerBounds.size.x + platformBounds.size.x) / 2 - std::abs(dx);
         float overlapY = (playerBounds.size.y + platformBounds.size.y) / 2 - std::abs(dy);
 
+        // Check if the character is an enemy
         Enemy* enemy = dynamic_cast<Enemy*>(&character);
         bool isEnemy = enemy != nullptr;
 
@@ -76,6 +79,7 @@ void CollisionManager::HandlePlatformCollision(Character& character, Platform& p
     }
 }
 
+// --- Function that handles character collisions ---
 void CollisionManager::HandleCharacterCollision(Character& a, Character& b)
 {
     // Return out of function if the characters are within collision cooldown

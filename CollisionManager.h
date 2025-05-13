@@ -10,6 +10,7 @@
 class CollisionManager
 {
 public:
+    // Functions
     static void HandlePlatformCollision(Character& character, Platform& platform);
     static void HandleCharacterCollision(Character& a, Character& b);
 

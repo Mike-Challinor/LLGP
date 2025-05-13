@@ -13,8 +13,8 @@ private:
     const int m_maxEnemies = 7;
 
     // Floats
-    float m_waveDelayTime = 0.2;
-    float m_enemySpawnTime = 0.2;
+    float m_waveDelayTime = 0.2f;
+    float m_enemySpawnTime = 0.2f;
 
     // Bools
     bool m_isWaveActive = false;
@@ -30,18 +30,23 @@ private:
     int GetEnemiesForWave(int waveNumber);
 
 public:
+    // Constructor
     WaveManager();
 
-
+    // Update function
     void Update(float deltaTime);
+
+    // Functions
     void StartWave();
     void EndWave();
+    void EnemySpawned();
+    void EnemyDefeated();
+
+    // Accessor functions
     bool GetIsWaveComplete() const;
     bool GetCanSpawnEnemy() const;
     int GetRemainingEnemies() const;
     int GetCurrentWave() const;
-    void EnemySpawned();
-    void EnemyDefeated();
 
 };
 

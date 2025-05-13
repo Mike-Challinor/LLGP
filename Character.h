@@ -8,6 +8,7 @@
 #include "Commons.h"
 #include "Constants.h"
 
+// Structs
 struct Animation
 {
 	int numberOfFrames;
@@ -63,7 +64,7 @@ protected:
 	sf::Vector2f m_spawnPosition;
 	sf::Vector2f m_dynamicForce;
 
-	//Bools
+	// Bools
 	bool m_isJumping = false;
 	bool m_isFacingRight = true;
 	bool m_isMoving = false;
@@ -80,10 +81,10 @@ protected:
 	// Floats
 	float m_movementSpeed;
 	float m_jumpForce;
+	float m_riderXOffset = 6.f;
+	float m_riderYOffset = 0.f;
 
 	// Ints
-	int m_riderXOffset = 6;
-	int m_riderYOffset = 0;
 	int m_riderIndex = 0;
 	int m_pointValue = POINTS_VALUE_BOUNDER;
 

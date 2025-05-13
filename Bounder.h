@@ -6,7 +6,7 @@ class Bounder : public Enemy
 public:
 
 	// Constructor
-	Bounder(LLGP::AssetRegistry& assetRegistry, float xPos = 100.f, float yPos = 100.f, const std::string& objectName = "bounder");
+	Bounder(LLGP::AssetRegistry& assetRegistry, WaypointManager& waypointManager, float xPos = 100.f, float yPos = 100.f, const std::string& objectName = "bounder");
 
 	// Update functions
 	void Update(float deltaTime) override;
@@ -14,6 +14,6 @@ public:
 private:
 
 	// Functions
-	void DecideNextMove() override;
+	void DecideNextMove(float deltaTime) override;
 };
 

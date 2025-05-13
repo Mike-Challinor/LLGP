@@ -2,7 +2,7 @@
 
 #include <random>
 
-
+// --- Constructor ---
 Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
     : m_inputManager(inputManager), m_assetRegistry(assetRegistry), m_player1ScoreText(m_font),
     m_player2ScoreText(m_font), m_waveText(m_font)
@@ -26,10 +26,10 @@ Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
     m_lava.setPosition(sf::Vector2f(0.f, SCREEN_HEIGHT - m_lava.getGlobalBounds().size.y));
 
     // --- Create the lives icons ---
-    int xPos = 195.f;
-    int yPos = SCREEN_HEIGHT - 55.f;
-    int iconWidth = 24.f;
-    int padding = 2.f;
+    int xPos = 195;
+    int yPos = SCREEN_HEIGHT - 55;
+    int iconWidth = 24;
+    int padding = 2;
 
     // Loop through for player 1's icons
     for (int i = 0; i < 5; i++)
@@ -38,7 +38,7 @@ Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
         xPos = xPos + iconWidth + padding;
     }
 
-    xPos = 350.f; // Update the x position for the player 2 icons
+    xPos = 350; // Update the x position for the player 2 icons
 
     // Loop through for player 2's icons
     for (int i = 0; i < 5; i++)
@@ -73,21 +73,21 @@ Game::Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry)
     m_player2ScoreText.setFillColor(sf::Color::Cyan);
     m_player2ScoreText.setPosition(sf::Vector2f(SCREEN_WIDTH - m_player2ScoreText.getGlobalBounds().size.x - 10.f, 10.f));
 
+    // Create the waypoints
+    CreateWaypoints();
+
     // Start the wave manager
     m_waveManager.StartWave();
 
-
-
-    //// Create enemies
-    //SpawnEnemy(EnemyType::Bounder);
-    //SpawnEnemy(EnemyType::Hunter);
-
 }
 
+// --- Destructor ---
 Game::~Game()
 {
+
 }
 
+// --- Function for getting a random spawn location from the list of spawn positions ---
 sf::Vector2f Game::GetRandomSpawnLocation()
 {
     // Set position to 0,0 if there are no spawn locations
@@ -101,30 +101,37 @@ sf::Vector2f Game::GetRandomSpawnLocation()
     static std::mt19937 gen(rd());
     std::uniform_int_distribution<> dist(0, static_cast<int>(m_spawnPositions.size()) - 1);
 
+    // Get a random index
     int randomIndex = dist(gen);
+
+    // Return a random position from the list of spawn positions from the random index
     return m_spawnPositions[randomIndex];
 }
 
+// --- Function for spawning enemies ---
 void Game::SpawnEnemy(EnemyType type)
 {
     // Get new random spawner location
     sf::Vector2f spawnPos = GetRandomSpawnLocation();
 
+    // Switch statement for each enemy type
     switch (type)
     {
     case EnemyType::Bounder:
-        SpawnCharacter<Bounder>(m_enemies, m_assetRegistry, spawnPos.x - 14.f, spawnPos.y, "enemy");
+        SpawnCharacter<Bounder>(m_enemies, m_assetRegistry, m_waypointManager, spawnPos.x - 14.f, spawnPos.y, "enemy");
         break;
 
     case EnemyType::Hunter:
-        SpawnCharacter<Hunter>(m_enemies, m_assetRegistry, spawnPos.x - 14.f, spawnPos.y, "enemy", m_players);
+        SpawnCharacter<Hunter>(m_enemies, m_assetRegistry, m_waypointManager, spawnPos.x - 14.f, spawnPos.y, "enemy", m_players);
         break;
     }
 
 }
 
+// --- Function for spawning players ---
 void Game::SpawnPlayer(PlayerType type)
 {
+    // Switch statement for each player
     switch (type)
     {
     case PlayerType::Player1:
@@ -137,6 +144,7 @@ void Game::SpawnPlayer(PlayerType type)
     }
 }
 
+// --- Function for respawning players ---
 void Game::RespawnPlayer(Player& player)
 {
     // Set the players new location
@@ -147,9 +155,12 @@ void Game::RespawnPlayer(Player& player)
     player.SetIsAlive(true);
 }
 
+// --- Function for erasing players from the players vector ---
 void Game::ErasePlayers()
 {
+    // Erase from players vector if pending removal
     std::erase_if(m_players, [this](const std::unique_ptr<Player>& player) {
+
         // Check if the player is in the list of pending removals
         return std::find_if(
             m_playersPendingRemoval.begin(),
@@ -157,13 +168,17 @@ void Game::ErasePlayers()
             [&](auto* ptr) { return ptr == &player; }) != m_playersPendingRemoval.end();
         });
 
+    // Clear the players pending removal now they have been erased
     m_playersPendingRemoval.clear();
 }
 
+// --- Function for scheduling players for deletion ---
 void Game::SchedulePlayersForDeletion()
 {
+    // Loop through all players
     for (auto& player : m_players)
     {
+        // If the player is dead add them to pending removal vector
         if (player->GetLives() == 0)
         {
             m_playersPendingRemoval.push_back(&player);  // Store the pointer of the player to be removed
@@ -171,8 +186,31 @@ void Game::SchedulePlayersForDeletion()
     }
 }
 
+// --- Function for creating waypoints ---
+void Game::CreateWaypoints()
+{
+    // Loop through the platforms
+    for (const auto& platform : m_platforms)
+    {
+        sf::Vector2f pos = platform->GetPosition(); // Get the platforms positions
+        float width = platform->GetSize().x; // Get the platforms width
+
+        // Left edge
+        m_waypointManager.AddWaypoint(std::make_unique<Waypoint>(pos.x, pos.y - 40.f));
+
+        // Center
+        m_waypointManager.AddWaypoint(std::make_unique<Waypoint>(pos.x + width / 2.f, pos.y - 40.f));
+
+        // Right edge
+        m_waypointManager.AddWaypoint(std::make_unique<Waypoint>(pos.x + width, pos.y - 40.f));
+    }
+}
+
+
+// --- Main update function ---
 void Game::Update(float deltaTime)
 {
+    // Update the wave manager
     UpdateWaveManager(deltaTime);
 
     // Remove all enemies that are not alive
@@ -204,11 +242,13 @@ void Game::Update(float deltaTime)
         // Update the UI for each player
         UpdateUI(*player);
 
-        // --- Respawn players ---
+        // Respawn players
         if (!player->GetIsAlive())
         {
+            // Update the players respawn timer
             player->UpdateRespawnTimer(deltaTime);
-
+            
+            // If player can be respawned, then respawn them! :)
             if (player->GetCanRespawn())
             {
                 RespawnPlayer(*player);
@@ -223,6 +263,7 @@ void Game::Update(float deltaTime)
     // Loop through all characters
     for (auto* character : characters)
     {
+        // Check if the character is alive
         if (character->GetIsAlive())
         {
             // Update all characters
@@ -254,25 +295,29 @@ void Game::Update(float deltaTime)
         }
     }
 
-    // --- Remove all players that are not alive ---
+    // Remove all players that are not alive
     if (!m_playersPendingRemoval.empty())
     {
         ErasePlayers();
     }
 }
 
+// --- Function for updating inputs for the players ---
 void Game::UpdateInputs()
 {
+    // Loop through all players
 	for (auto& player : m_players)
 	{
+        // Call update input function on players
 		player->UpdateInput();
 	}
 }
 
+// --- Function for updating the UI ---
 void Game::UpdateUI(Player& player)
 {
-    //  --- Set the UI for each player ---
-    if (player.GetPlayerID() == 1)
+    // Set the UI for each player
+    if (player.GetPlayerID() == 1) // Player 1
     {
         // Set the score text
         sf::String score = std::to_string(player.GetScore());
@@ -288,7 +333,7 @@ void Game::UpdateUI(Player& player)
 
     }
 
-    else if (player.GetPlayerID() == 2)
+    else if (player.GetPlayerID() == 2) // Player 2
     {
         // --- Set the score text ---
         sf::String score = std::to_string(player.GetScore()); // Get the score and convert the int to a string
@@ -309,11 +354,12 @@ void Game::UpdateUI(Player& player)
     {
         sf::String waveNumber = std::to_string(m_waveManager.GetCurrentWave()); // Get the current wave number and convert to string
         m_waveText.setString("Wave " + waveNumber); // Set the string
-        //Update the texts position relevant to its size
+        // Update the texts position relevant to its size
         m_waveText.setPosition(sf::Vector2f((SCREEN_WIDTH / 2) - (m_waveText.getGlobalBounds().size.x / 2), 100.f));
     }
 }
 
+// --- Function for updating the wave manager ---
 void Game::UpdateWaveManager(float deltaTime)
 {
     // Update the wave manager
@@ -330,12 +376,13 @@ void Game::UpdateWaveManager(float deltaTime)
         // Spawn enemy if allowed
         if (m_waveManager.GetCanSpawnEnemy())
         {
-            SpawnEnemy(EnemyType::Bounder);
-            m_waveManager.EnemySpawned();
+            SpawnEnemy(EnemyType::Bounder); // Spawn an enemy (just bounders for now)
+            m_waveManager.EnemySpawned(); // Let the wave manager know an enemy has spawned
         }
     }
 }
 
+// --- Function for rendering all objects in the scene ---
 void Game::Render(sf::RenderTarget& target)
 {
     // --- Render the players ---
