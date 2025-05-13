@@ -30,18 +30,23 @@ private:
     int GetEnemiesForWave(int waveNumber);
 
 public:
+    // Constructor
     WaveManager();
 
-
+    // Update function
     void Update(float deltaTime);
+
+    // Functions
     void StartWave();
     void EndWave();
+    void EnemySpawned();
+    void EnemyDefeated();
+
+    // Accessor functions
     bool GetIsWaveComplete() const;
     bool GetCanSpawnEnemy() const;
     int GetRemainingEnemies() const;
     int GetCurrentWave() const;
-    void EnemySpawned();
-    void EnemyDefeated();
 
 };
 

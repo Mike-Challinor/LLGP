@@ -1,8 +1,10 @@
 #include "Platform.h"
 
+// --- Constructor ---
 Platform::Platform(LLGP::AssetRegistry& assetRegistry, float xPos, float yPos, const std::string& objectName)
 	: GameObject(assetRegistry, xPos, yPos, objectName)
 {
+	// Set the texture rect of the sprite 
 	m_sprite.setTextureRect(m_textureMap.begin()->second);
 
 	// Create collision shape for the platforms shape
@@ -10,14 +12,16 @@ Platform::Platform(LLGP::AssetRegistry& assetRegistry, float xPos, float yPos, c
 	platformCollision->AddCollisionShape("surface", sf::FloatRect{{ xPos, yPos },{ 65.f, 14.f }}, CollisionType::Solid);
 	SetCollisionComponent(std::move(platformCollision));
 
+	// Set whether the platform has a spawner
 	SetHasSpawner(objectName);
 }
 
+// --- Destructor ---
 Platform::~Platform()
 {
-
 }
 
+// --- Function that sets whether the platform has a spawner (based of off the name passed through) ---
 void Platform::SetHasSpawner(const std::string& objectName)
 {
 	// Create temporary floats for the x and y pos of the spawner
@@ -76,11 +80,13 @@ void Platform::SetHasSpawner(const std::string& objectName)
 	m_spawnPosition = sf::Vector2f(xPos, yPos);
 }
 
+// --- Function that returns the platforms spawn position ---
 sf::Vector2f Platform::GetSpawnPosition()
 {
 	return m_spawnPosition;
 }
 
+// --- Function that returns whether the platform has a spawner ---
 bool Platform::GetHasSpawner()
 {
 	return m_hasSpawner;

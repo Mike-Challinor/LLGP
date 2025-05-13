@@ -1,5 +1,6 @@
 #include "Character.h"
 
+// --- Constructor ---
 Character::Character(LLGP::AssetRegistry& assetRegistry, float xPos, float yPos, const std::string& objectName) : 
 	GameObject(assetRegistry, xPos, yPos, objectName), m_riderSprite(m_texture)
 {
@@ -7,7 +8,10 @@ Character::Character(LLGP::AssetRegistry& assetRegistry, float xPos, float yPos,
 	m_riderSprite.setTextureRect(m_assetRegistry.LoadSprite("rider", m_riderIndex));
 	SetRiderPosition();
 
+	// Set the initial foot position of the character
 	UpdateFeetPosition();
+
+	// Initialise the characters variables
 	InitVariables();
 	
 	// Create pointer to the animation component and initialise it
@@ -15,15 +19,18 @@ Character::Character(LLGP::AssetRegistry& assetRegistry, float xPos, float yPos,
 
 }
 
+// --- Destructor ---
 Character::~Character()
 {
 }
 
+// --- Function for initialising the characters variables ---
 void Character::InitVariables()
 {
 	m_movementSpeed = PLAYER_MAX_HORIZONTAL_MOVEMENTSPEED;
 }
 
+// --- Function for updating the foot position of the character ---
 void Character::UpdateFeetPosition()
 {
 	// Update the feet position (the bottom center of the player)
@@ -31,6 +38,7 @@ void Character::UpdateFeetPosition()
 		m_sprite.getPosition().y + m_sprite.getGlobalBounds().size.y);
 }
 
+// --- Function for flipping the characters sprite ---
 void Character::FlipSprite()
 {
 	sf::FloatRect bounds = m_sprite.getLocalBounds();
@@ -62,6 +70,7 @@ void Character::FlipSprite()
 	m_isFacingRight = !m_isFacingRight;
 }
 
+// --- Function for setting the animation state of the character ---
 void Character::SetAnimationState()
 {
 	// Calculate the velocity magnitude (speed)
@@ -105,8 +114,10 @@ void Character::SetAnimationState()
 
 }
 
+// --- Function for ending spawning ---
 void Character::StopSpawning()
 {
+	// Set booleans
 	m_isSpawning = false;
 	m_canFall = true;
 	m_canJump = true;
@@ -116,6 +127,7 @@ void Character::StopSpawning()
 	m_sprite.setColor(sf::Color::White);
 }
 
+// --- Function for checking collision with the left of the screen ---
 bool Character::CheckLeftColl()
 {
 	if (m_sprite.getGlobalBounds().position.x + m_sprite.getGlobalBounds().size.x <= 0.f)
@@ -128,6 +140,7 @@ bool Character::CheckLeftColl()
 	}
 }
 
+// --- Function for checking collision with the right of the screen ---
 bool Character::CheckRightColl()
 {
 	if (m_sprite.getGlobalBounds().position.x >= SCREEN_WIDTH)
@@ -140,6 +153,7 @@ bool Character::CheckRightColl()
 	}
 }
 
+// --- Function for checking collision with the top of the screen ---
 bool Character::CheckTopColl()
 {
 	if (m_sprite.getGlobalBounds().position.y <= 0.f)
@@ -153,6 +167,7 @@ bool Character::CheckTopColl()
 	}
 }
 
+// --- Function for checking collision with the bottom of the screen ---
 bool Character::CheckFeetColl()
 {
 	// Check if feet are colliding with the ground (using feet position)
@@ -167,6 +182,7 @@ bool Character::CheckFeetColl()
 	return false;
 }
 
+// --- Function for moving the character ---
 void Character::Move()
 {
 	if (!m_isSpawning)
@@ -176,6 +192,7 @@ void Character::Move()
 	}
 }
 
+// --- Function for jumping ---
 void Character::Jump()
 {
 	if (!m_isJumping && m_canJump)
@@ -189,6 +206,7 @@ void Character::Jump()
 	ReduceJumpForce();
 }
 
+// --- Function for reducing the jumps force ---
 void Character::ReduceJumpForce()
 {
 	if (m_isJumping)
@@ -211,11 +229,13 @@ void Character::ReduceJumpForce()
 	}
 }
 
+// --- Empty function declaration for updating movement direction ---
 void Character::UpdateMovementDirection()
 {
-
+	// This could maybe be moved into the player character class
 }
 
+// --- Function for moving the character to the spawn position ---
 void Character::MoveToSpawnPosition()
 {
 	debugName;
@@ -229,6 +249,7 @@ void Character::MoveToSpawnPosition()
 	}
 }
 
+// --- Function for setting the rider sprite position relevant to the base sprites position ---
 void Character::SetRiderPosition()
 {
 	// Get the sprite’s actual visual origin (in world space)
@@ -236,6 +257,7 @@ void Character::SetRiderPosition()
 	sf::Vector2f origin = m_sprite.getOrigin();
 	sf::Vector2f scale = m_sprite.getScale();
 
+	// Set the x offset of the rider
 	float xOffset = m_riderXOffset;
 
 	if (!m_isFacingRight)
@@ -246,15 +268,17 @@ void Character::SetRiderPosition()
 	// Flip-aware offset (only flip horizontally)
 	sf::Vector2f offset(xOffset, m_riderYOffset);
 
-	offset.x *= scale.x; // Flip horizontally if scale.x == -1
+	// Flip horizontally if scale.x == -1
+	offset.x *= scale.x; 
 
 	// Position rider relative to the character's true visual anchor
 	sf::Vector2f anchoredPos = charPos + offset;
 
+	// Set the riders position to the anchored position
 	m_riderSprite.setPosition(anchoredPos);
 }
 
-
+// --- Function for applying gravity to the character ---
 void Character::AddGravity()
 {
 	if (m_canFall)
@@ -270,34 +294,35 @@ void Character::AddGravity()
 		// If grounded
 		else
 		{
-			// player is grounded, so set the y velocity to 0
+			// Player is grounded, so set the y velocity to 0
 			m_velocity.y = 0;
 		}
 	}
 }
 
+// --- Function for updating the windows bound collision ---
 void Character::UpdateWindowsBoundCollision()
 {
-	// Left
+	// Left bound of the screen
 	if (this->CheckLeftColl())
 	{
 		m_sprite.setPosition(sf::Vector2f(SCREEN_WIDTH, m_sprite.getGlobalBounds().position.y));
 	}
 
-	// Right
+	// Right bound of the screen
 	else if (this->CheckRightColl())
 	{
 		m_sprite.setPosition(sf::Vector2f(0.f, m_sprite.getGlobalBounds().position.y));
 	}
 
 
-	// Top
+	// Top bound of the screen
 	if (this->CheckTopColl())
 	{
 		m_sprite.setPosition(sf::Vector2f(m_sprite.getGlobalBounds().position.x, 0.f));
 	}
 
-	// Bottom
+	// Bottom bound of the screen
 
 	else if (this->CheckFeetColl())
 	{
@@ -305,12 +330,14 @@ void Character::UpdateWindowsBoundCollision()
 	}
 }
 
+// --- Function for creating the animation component ---
 void Character::CreateAnimationComponent(sf::Sprite& sprite, const std::string& name)
 {
 	// Create pointer to the animation component
 	m_animationComponent = make_unique<LLGP::AnimationComponent>(m_sprite, m_objectName);
 }
 
+// --- Function for spawning the character ---
 void Character::Spawn()
 {
 	m_isSpawning = true;
@@ -326,11 +353,13 @@ void Character::Spawn()
 
 }
 
+// --- Function for setting the base sprites position ---
 void Character::SetPosition(float xPos, float yPos)
 {
 	m_sprite.setPosition(sf::Vector2f(xPos, yPos));
 }
 
+// --- Function for stopping horizontal movement ---
 void Character::StopHorizontalMovement()
 {
 	m_velocity.x = 0.f;
@@ -338,6 +367,7 @@ void Character::StopHorizontalMovement()
 	m_canJump = true;
 }
 
+// --- Function for stopping jumping movement ---
 void Character::StopJumpingMovement()
 {
 	m_isJumping = false;
@@ -345,6 +375,7 @@ void Character::StopJumpingMovement()
 	m_isFalling = true;
 }
 
+// --- Function for stopping falling movement ---
 void Character::StopFalling()
 {
 	m_velocity.y = 0.f;
@@ -354,42 +385,84 @@ void Character::StopFalling()
 	m_isFalling = false;
 }
 
+// --- Function for despawning ---
 void Character::Despawn()
 {
 	m_isAlive = false;
 }
 
+// --- Function that returns whether the character is spawning ---
 bool Character::GetIsSpawning()
 {
 	return m_isSpawning;
 }
 
+// --- Function that returns whether the character is falling ---
 bool Character::GetIsFalling()
 {
 	return m_isFalling;
 }
 
+// --- Function that returns the base sprites global position ---
 sf::Vector2f Character::GetPosition()
 {
 	return m_sprite.getGlobalBounds().position;
 }
 
+// --- Function that returns the characters velocity ---
 sf::Vector2f Character::GetVelocity() const
 {
 	return m_velocity;
 }
 
+// --- Function that returns whether the character can collide ---
+bool Character::GetCanCollide() const
+{
+	if (m_canCollide && m_collisionCooldown <= 0.f)
+		return true;
+
+	else
+		return false;
+}
+
+// --- Function that returns whether the character has a rider ---
+bool Character::GetHasRider() const
+{
+	return m_hasRider;
+}
+
+// --- Function that returns whether the character is alive ---
+bool Character::GetIsAlive() const
+{
+	return m_isAlive;
+}
+
+// --- Function that returns the characters points value ---
+int Character::GetPointsValue() const
+{
+	return m_pointValue;
+}
+
+// --- Function that returns the characters facing direction ---
+bool Character::GetIsFacingRight() const
+{
+	return m_isFacingRight;
+}
+
+// --- Function that sets the characters velocity ---
 void Character::SetVelocity(const sf::Vector2f newVelocity)
 {
 	m_velocity = newVelocity;
 }
 
+// --- Function that updates the collision cooldown ---
 void Character::UpdateCollisionCooldown(float deltaTime)
 {
 	if (m_collisionCooldown > 0.f)
 		m_collisionCooldown -= deltaTime;
 }
 
+// --- Function that decrements any dynamic forces applied to the character ---
 void Character::UpdateForceDecrement()
 {
 	if (m_dynamicForce != sf::Vector2f(0.f, 0.f))
@@ -397,14 +470,14 @@ void Character::UpdateForceDecrement()
 		// Decrement the x force value
 		if (m_dynamicForce.x > 0)
 			m_dynamicForce.x -= COLLISION_FORCE_DECREMENT;
-
+		// Increment the x force value
 		else if (m_dynamicForce.x < 0)
 			m_dynamicForce.x += COLLISION_FORCE_DECREMENT;
 
 		// Decrement the y force value
 		if (m_dynamicForce.y > 0)
 			m_dynamicForce.y -= COLLISION_FORCE_DECREMENT;
-
+		// Increment the y force value
 		else if (m_dynamicForce.y < 0)
 			m_dynamicForce.y += COLLISION_FORCE_DECREMENT;
 
@@ -416,6 +489,7 @@ void Character::UpdateForceDecrement()
 	}
 }
 
+// --- Render function ---
 void Character::Render(sf::RenderTarget& target)
 {
 	// Draw the rider
@@ -425,42 +499,16 @@ void Character::Render(sf::RenderTarget& target)
 	GameObject::Render(target);
 }
 
-bool Character::GetCanCollide() const
-{
-	if (m_canCollide && m_collisionCooldown <= 0.f)
-		return true;
-
-	else
-		return false;
-}
-
-bool Character::GetHasRider() const
-{
-	return m_hasRider;
-}
-
-bool Character::GetIsAlive() const
-{
-	return m_isAlive;
-}
-
-int Character::GetPointsValue() const
-{
-	return m_pointValue;
-}
-
-bool Character::GetIsFacingRight() const
-{
-	return m_isFacingRight;
-}
-
+// --- Function that resets the collision cooldown ---
 void Character::ResetCollisionCooldown()
 {
 	m_collisionCooldown = m_maxCollisionCooldown;
 }
 
+// --- Function that applies a new force to the character ---
 void Character::AddNewForce(sf::Vector2f forceToAdd)
 {
+	// Increment the current force applied with the new force to add
 	m_dynamicForce += forceToAdd;
 
 	// Clamp X and Y forces
@@ -468,10 +516,9 @@ void Character::AddNewForce(sf::Vector2f forceToAdd)
 	m_dynamicForce.y = std::clamp(m_dynamicForce.y, -COLLISION_MAX_FORCE, COLLISION_MAX_FORCE);
 }
 
+// --- Main update function ---
 void Character::Update(float deltaTime)
 {
-	debugName;
-
 	if (m_isSpawning) // If the player is spawning
 	{
 		MoveToSpawnPosition();

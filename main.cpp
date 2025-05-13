@@ -7,6 +7,7 @@
 
 using namespace std;
 
+// Win Main
 int WinMain()
 {
     // Create window

@@ -81,9 +81,6 @@
     <ClCompile Include="LivesIcon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Timer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="WaveManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

@@ -8,6 +8,7 @@
 #include "Commons.h"
 #include "Constants.h"
 
+// Structs
 struct Animation
 {
 	int numberOfFrames;

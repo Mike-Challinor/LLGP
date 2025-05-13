@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory> 
 
+// Structs
 struct Waypoint {
     sf::Vector2f position;
     bool isActivated;
@@ -12,11 +13,15 @@ struct Waypoint {
 
 class WaypointManager {
 public:
+    // Functions
     void AddWaypoint(std::shared_ptr<Waypoint> waypoint);
-    Waypoint* GetNextWaypoint();
     void ResetWaypoints();
+
+    // Accessor functions
+    Waypoint* GetNextWaypoint();
     bool HasWaypoints() const;
 
 private:
+    // Vectors
     std::vector<std::shared_ptr<Waypoint>> m_waypoints;
 };

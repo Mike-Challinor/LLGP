@@ -15,6 +15,7 @@
 #include "CollisionManager.h"
 #include "LivesIcon.h"
 
+// Enums
 enum class EnemyType
 {
 	Player,
@@ -74,12 +75,16 @@ private:
 	sf::RectangleShape m_lava;
 
 public:
+	// Constructor and Destructor
 	Game(LLGP::InputManager& inputManager, LLGP::AssetRegistry& assetRegistry);
 	~Game();
 
+	// Update functions
 	void Update(float deltaTime);
 	void UpdateInputs();
 	void UpdateUI(Player& player);
+
+	// Render functions
 	void Render(sf::RenderTarget& target);
 
 	// Template function to spawn a character into a container

@@ -1,5 +1,6 @@
 #include "Bounder.h"
 
+// --- Constructor ---
 Bounder::Bounder(LLGP::AssetRegistry& assetRegistry, WaypointManager& waypointManager, float xPos, float yPos, const std::string& objectName)
     : Enemy(assetRegistry, waypointManager, xPos, yPos, objectName)
 {
@@ -7,18 +8,13 @@ Bounder::Bounder(LLGP::AssetRegistry& assetRegistry, WaypointManager& waypointMa
     debugName = "Bounder";
 }
 
+// --- Function for deciding the next move (overriden from Enemy class) ---
 void Bounder::DecideNextMove(float deltaTime)
 {
     Enemy::DecideNextMove(deltaTime);
-
-    /*
-    // If the enemy has collided, find a new target
-    if (m_hasCollided)
-    {
-        FindTarget();
-    }*/
 }
 
+// --- Update function ---
 void Bounder::Update(float deltaTime)
 {
     Enemy::Update(deltaTime);

@@ -151,7 +151,6 @@
     <ClCompile Include="Platform.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Enemy.cpp" />
-    <ClCompile Include="Timer.cpp" />
     <ClCompile Include="WaveManager.cpp" />
     <ClCompile Include="WaypointManager.cpp" />
   </ItemGroup>

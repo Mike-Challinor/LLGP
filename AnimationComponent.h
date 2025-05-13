@@ -6,6 +6,7 @@
 
 namespace LLGP
 {
+	// Enums
 	enum AnimationState
 	{
 		idle,
@@ -14,6 +15,7 @@ namespace LLGP
 		flying
 	};
 
+	// Convert animation state to string
 	inline std::string ToString(AnimationState state)
 	{
 		switch (state)
@@ -60,15 +62,19 @@ namespace LLGP
 		void SetFrameTime(float timePerFrame);
 	
 	public:
+		// Constructor and Destructor
 		AnimationComponent(sf::Sprite& sprite, std::string name);
 		~AnimationComponent();
 
+		// Functions
 		void SetAnimationState(AnimationState state, std::unordered_map<std::string, sf::IntRect>& intRectMap, 
 			int numberOfFrames, int startingFrame, float frameTime = 0.1f);
-		AnimationState GetState();
 
+		// Accessor functions
+		AnimationState GetState();
 		int GetCurrentFrame();
 
+		// Update functions
 		void Update(float deltaTime);
 	};
 }

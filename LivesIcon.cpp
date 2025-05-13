@@ -1,5 +1,6 @@
 #include "LivesIcon.h"
 
+// --- Contructor ---
 LivesIcon::LivesIcon(LLGP::AssetRegistry& assetRegistry, float xPos, float yPos, const std::string& objectName, int spriteIndex) 
 	: GameObject(assetRegistry, xPos, yPos, objectName)
 {
@@ -7,10 +8,12 @@ LivesIcon::LivesIcon(LLGP::AssetRegistry& assetRegistry, float xPos, float yPos,
 	SetTexture();
 }
 
+// --- Destructor ---
 LivesIcon::~LivesIcon()
 {
 }
 
+// --- Set the texture of the base sprite (overidden from GameObject class) ---
 void LivesIcon::SetTexture()
 {
 	m_texture = m_assetRegistry.LoadTexture();
